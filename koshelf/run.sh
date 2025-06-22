@@ -14,9 +14,9 @@ echo "Database path: $DATABASE_PATH"
 # Validate that at least one path is provided
 if [[ -z "$BOOKS_PATH" || "$BOOKS_PATH" == "" ]] && [[ -z "$DATABASE_PATH" || "$DATABASE_PATH" == "" ]]; then
     echo ""
-    echo "╔════════════════════════════════════════════════════════════════════════════"
-    echo "║                                ⚠️  ERROR  ⚠️                                "
-    echo "╠════════════════════════════════════════════════════════════════════════════"
+    echo "║"
+    echo "║                                ⚠️  ERROR  ⚠️"
+    echo "║"
     echo "║"
     echo "║  🚨 CONFIGURATION REQUIRED 🚨"
     echo "║"
@@ -39,7 +39,7 @@ if [[ -z "$BOOKS_PATH" || "$BOOKS_PATH" == "" ]] && [[ -z "$DATABASE_PATH" || "$
     echo "║"
     echo "║  💡 Remember: Files must be under /media/ or /share/ directories!"
     echo "║"
-    echo "╚══════════════════════════════════════════════════════════════════════════════"
+    echo "║"
     echo ""
     bashio::log.fatal "KoShelf addon configuration error - see detailed message above"
     bashio::exit.nok
