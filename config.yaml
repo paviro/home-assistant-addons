@@ -1,0 +1,22 @@
+name: "Koshelf"
+description: "Transform your KOReader library into a beautiful reading dashboard with statistics."
+version: "1.0.2"
+slug: "koshelf"
+init: false
+arch:
+  - amd64
+  - aarch64
+startup: services
+map:
+  - media:ro
+  - share:ro
+ports:
+  38492/tcp: 38492
+options:
+  include_unread: false
+  books_path: ""
+  database_path: ""
+schema:
+  books_path: str?
+  database_path: str?
+  include_unread: bool
