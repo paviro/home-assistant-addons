@@ -18,6 +18,20 @@ This addon packages the KoShelf Rust CLI tool as a Home Assistant addon, making 
 - 🚀 **Web Interface**: Runs as a web server accessible through Home Assistant
 - 📱 **Responsive**: Optimized for desktop, tablet, and mobile with adaptive grid layouts
 
+## Installation
+
+Click the Home Assistant My button below to open the add-on on your Home Assistant instance.
+
+[![Open this add-on in your Home Assistant instance.][addon-badge]][addon]
+
+1. Click the "Install" button to install the add-on.
+2. Configure the addon (see Configuration section below)
+3. Start the addon
+4. Access your library at `http://homeassistant.local:38492` (or your Home Assistant IP with port 38492)
+
+[addon]: https://my.home-assistant.io/redirect/supervisor_addon/?addon=koshelf&repository_url=https%3A%2F%2Fgithub.com%2Fpaviro%2FKOShelf-home-assistant-addon
+[addon-badge]: https://my.home-assistant.io/badges/supervisor_addon.svg
+
 ## Configuration
 
 ### File Location Requirements
