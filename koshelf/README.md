@@ -2,22 +2,6 @@
 
 A Home Assistant addon that runs [KoShelf](https://github.com/paviro/KOShelf) - a beautiful static website generator for your KoReader library, showcasing your ebook collection with highlights, annotations, and reading progress.
 
-## About
-
-This addon packages the KoShelf Rust CLI tool as a Home Assistant addon, making it easy to run KoShelf on your Home Assistant instance. It automatically downloads the appropriate KoShelf binary for your system architecture and runs it in web server mode.
-
-## Features
-
-- 📚 **Book Library Overview**: Displays your currently reading, completed and unread books (EPUBs only!)
-- 🎨 **Modern UI**: Beautiful design powered by Tailwind CSS with clean typography and responsive layout
-- 📝 **Annotations & Highlights**: Shows all your KoReader highlights and notes with elegant formatting
-- 📖 **Book Details**: Individual pages for each book with metadata and organized annotations
-- 📊 **Reading Statistics**: Track your reading habits with detailed statistics including reading time, pages read, activity heatmaps, and weekly breakdowns
-- 📈 **Per-Book Statistics**: Detailed statistics for each book including session count, average session duration, reading speed, and last read date
-- 🔍 **Search & Filter**: Search through your library by title, author, or series, with filters for reading status
-- 🚀 **Web Interface**: Runs as a web server accessible through Home Assistant
-- 📱 **Responsive**: Optimized for desktop, tablet, and mobile with adaptive grid layouts
-
 ## Configuration
 
 ### File Location Requirements
@@ -80,28 +64,3 @@ The addon runs KoShelf in web server mode, which means it will automatically reb
 ### Recommended: Use with Nginx Reverse Proxy
 
 For enhanced security, SSL support, and custom domain access, it's highly recommended to use this addon behind a reverse proxy. The [Nginx Proxy Manager addon](https://github.com/hassio-addons/addon-nginx-proxy-manager) provides an easy-to-use interface for setting up reverse proxies in Home Assistant.
-
-## Supported Data
-
-### From EPUB Files
-- Book title, authors, description
-- Cover image, language, publisher
-- Series information (name and number)
-- Identifiers (ISBN, ASIN, Goodreads, DOI, etc.)
-- Subjects/Genres
-
-### From KoReader Metadata
-- Reading status (reading/complete)
-- Highlights and annotations with chapter information
-- Notes attached to highlights
-- Reading progress percentage
-- Rating (stars out of 5)
-- Summary note
-
-### From KoReader Statistics Database
-- Total reading time and pages
-- Weekly reading statistics
-- Reading activity heatmap
-- Per-book reading sessions and statistics
-- Reading speed calculations
-- Session duration tracking
