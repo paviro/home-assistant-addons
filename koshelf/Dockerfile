@@ -8,7 +8,7 @@ RUN apk add --no-cache \
     unzip
 
 # Set the version
-ARG KOSHELF_VERSION=1.0.3
+ARG KOSHELF_VERSION=1.0.4
 
 # Detect architecture and libc, then download appropriate binary
 RUN ARCH=$(uname -m) && \
@@ -31,7 +31,7 @@ RUN ARCH=$(uname -m) && \
     echo "Detected: Architecture=${ARCH}, Libc=${LIBC}" && \
     echo "Downloading koshelf v${KOSHELF_VERSION} for ${RELEASE_ARCH}" && \
     curl -L -o /tmp/koshelf.zip \
-        "https://github.com/paviro/KOShelf/releases/download/v${KOSHELF_VERSION}/${RELEASE_ARCH}.zip" && \
+        "https://github.com/paviro/KoShelf/releases/download/v${KOSHELF_VERSION}/${RELEASE_ARCH}.zip" && \
     unzip /tmp/koshelf.zip -d /tmp/ && \
     mv /tmp/koshelf /usr/local/bin/koshelf && \
     chmod +x /usr/local/bin/koshelf && \

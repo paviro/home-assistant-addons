@@ -1,6 +1,6 @@
-name: "KOShelf"
+name: "KoShelf"
 description: "Transform your KOReader library into a beautiful reading dashboard with statistics."
-version: "1.0.3"
+version: "1.0.4"
 slug: "koshelf"
 init: false
 arch:
