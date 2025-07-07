@@ -6,10 +6,15 @@ echo "Starting koshelf addon..."
 BOOKS_PATH=$(bashio::config 'books_path')
 INCLUDE_UNREAD=$(bashio::config 'include_unread')
 DATABASE_PATH=$(bashio::config 'database_path')
+HEATMAP_SCALE_MAX=$(bashio::config 'heatmap_scale_max')
+if [ -z "$HEATMAP_SCALE_MAX" ] || [ "$HEATMAP_SCALE_MAX" == "" ]; then
+    HEATMAP_SCALE_MAX="auto"
+fi
 
 echo "Books path: $BOOKS_PATH"
 echo "Include unread: $INCLUDE_UNREAD"
 echo "Database path: $DATABASE_PATH"
+echo "Heatmap scale max: $HEATMAP_SCALE_MAX"
 
 # Validate that at least one path is provided
 if [[ -z "$BOOKS_PATH" || "$BOOKS_PATH" == "" ]] && [[ -z "$DATABASE_PATH" || "$DATABASE_PATH" == "" ]]; then
@@ -62,6 +67,9 @@ fi
 if [ "$INCLUDE_UNREAD" = "true" ]; then
     COMMAND="$COMMAND --include-unread"
 fi
+
+# Always include --heatmap-scale-max flag
+COMMAND="$COMMAND --heatmap-scale-max \"$HEATMAP_SCALE_MAX\""
 
 echo "Running: $COMMAND"
 

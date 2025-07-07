@@ -1,6 +1,6 @@
 name: "KoShelf"
 description: "Transform your KOReader library into a beautiful reading dashboard with statistics."
-version: "1.0.17"
+version: "1.0.18"
 slug: "koshelf"
 init: false
 arch:
@@ -16,7 +16,9 @@ options:
   include_unread: false
   books_path: ""
   database_path: ""
+  heatmap_scale_max: "auto"
 schema:
   books_path: str?
   database_path: str?
   include_unread: bool
+  heatmap_scale_max: str

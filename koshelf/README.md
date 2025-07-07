@@ -55,12 +55,19 @@ Click the Home Assistant My button below to open the add-on on your Home Assista
   - Default: `false`
   - Set to `true` to show all EPUB files, even those you haven't opened in KoReader yet
 
+- **heatmap_scale_max**: Maximum value for heatmap color intensity scaling
+  - Default: `"auto"`
+  - Examples: `"auto"`, `"1h"`, `"1h30m"`, `"45min"`
+  - Values above this will still be shown but use the highest color intensity
+  - `"auto"` enables automatic scaling based on your data
+
 ### Example Configuration
 
 ```yaml
 books_path: /share/books
 database_path: /share/koreader/statistics.sqlite3
 include_unread: true
+heatmap_scale_max: "auto"
 ```
 
 ## File Structure Expected
