@@ -10,11 +10,15 @@ HEATMAP_SCALE_MAX=$(bashio::config 'heatmap_scale_max')
 if [ -z "$HEATMAP_SCALE_MAX" ] || [ "$HEATMAP_SCALE_MAX" == "" ]; then
     HEATMAP_SCALE_MAX="auto"
 fi
+DAY_START_TIME=$(bashio::config 'day_start_time')
+TIMEZONE=$(bashio::config 'timezone')
 
 echo "Books path: $BOOKS_PATH"
 echo "Include unread: $INCLUDE_UNREAD"
 echo "Database path: $DATABASE_PATH"
 echo "Heatmap scale max: $HEATMAP_SCALE_MAX"
+echo "Day start time: $DAY_START_TIME"
+echo "Timezone: $TIMEZONE"
 
 # Validate that at least one path is provided
 if [[ -z "$BOOKS_PATH" || "$BOOKS_PATH" == "" ]] && [[ -z "$DATABASE_PATH" || "$DATABASE_PATH" == "" ]]; then
@@ -70,6 +74,16 @@ fi
 
 # Always include --heatmap-scale-max flag
 COMMAND="$COMMAND --heatmap-scale-max \"$HEATMAP_SCALE_MAX\""
+
+# Add optional day start time if provided
+if [ -n "$DAY_START_TIME" ] && [ "$DAY_START_TIME" != "" ]; then
+    COMMAND="$COMMAND --day-start-time \"$DAY_START_TIME\""
+fi
+
+# Add optional timezone if provided
+if [ -n "$TIMEZONE" ] && [ "$TIMEZONE" != "" ]; then
+    COMMAND="$COMMAND --timezone \"$TIMEZONE\""
+fi
 
 echo "Running: $COMMAND"
 

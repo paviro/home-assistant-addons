@@ -61,6 +61,14 @@ Click the Home Assistant My button below to open the add-on on your Home Assista
   - Values above this will still be shown but use the highest color intensity
   - `"auto"` enables automatic scaling based on your data
 
+- **day_start_time**: Logical day start time in `HH:MM`
+  - Default: `"00:00"`
+  - Determines when a new logical day begins for statistics
+
+- **timezone**: IANA timezone name used to interpret timestamps
+  - Default: system local timezone
+  - Examples: `"Australia/Sydney"`, `"America/New_York"`, `"Europe/Berlin"`
+
 ### Example Configuration
 
 ```yaml
@@ -68,6 +76,8 @@ books_path: /share/books
 database_path: /share/koreader/statistics.sqlite3
 include_unread: true
 heatmap_scale_max: "auto"
+day_start_time: "04:00"
+timezone: "Australia/Sydney"
 ```
 
 ## File Structure Expected
