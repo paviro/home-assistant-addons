@@ -86,17 +86,17 @@ Click the Home Assistant My button below to open the add-on on your Home Assista
   - Default: system local timezone
   - Examples: `"Australia/Sydney"`, `"America/New_York"`, `"Europe/Berlin"`
 
-- **min_pages_per_day**: Minimum required pages read per day to be counted in statistics
+- **min_pages_per_day**: Minimum required pages read per book in a day to be counted in statistics
   - Example: `10`
   - Optional integer value
-  - Days with fewer pages read will not be counted in statistics
+  - Books with fewer pages read will not be counted in statistics
 
-- **min_time_per_day**: Minimum required reading time per day to be counted in statistics
+- **min_time_per_day**: Minimum required reading time per book in a day to be counted in statistics
   - Examples: `"15m"`, `"1h"`, `"30m"`
   - Optional duration value
-  - Days with less reading time will not be counted in statistics
+  - Books with less reading time will not be counted in statistics
 
-**Note**: If both `min_pages_per_day` and `min_time_per_day` are provided, a day is counted if either condition is met.
+**Note**: If both `min_pages_per_day` and `min_time_per_day` are provided, a book is added to the statistics if either condition is met within a given day.
 
 ### Example Configuration
 
