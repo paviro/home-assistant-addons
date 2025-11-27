@@ -6,19 +6,29 @@ echo "Starting koshelf addon..."
 BOOKS_PATH=$(bashio::config 'books_path')
 INCLUDE_UNREAD=$(bashio::config 'include_unread')
 DATABASE_PATH=$(bashio::config 'database_path')
+DOCSETTINGS_PATH=$(bashio::config 'docsettings_path')
+HASHDOCSETTINGS_PATH=$(bashio::config 'hashdocsettings_path')
 HEATMAP_SCALE_MAX=$(bashio::config 'heatmap_scale_max')
 if [ -z "$HEATMAP_SCALE_MAX" ] || [ "$HEATMAP_SCALE_MAX" == "" ]; then
     HEATMAP_SCALE_MAX="auto"
 fi
 DAY_START_TIME=$(bashio::config 'day_start_time')
 TIMEZONE=$(bashio::config 'timezone')
+TITLE=$(bashio::config 'title')
+MIN_PAGES_PER_DAY=$(bashio::config 'min_pages_per_day')
+MIN_TIME_PER_DAY=$(bashio::config 'min_time_per_day')
 
 echo "Books path: $BOOKS_PATH"
 echo "Include unread: $INCLUDE_UNREAD"
 echo "Database path: $DATABASE_PATH"
+echo "Docsettings path: $DOCSETTINGS_PATH"
+echo "Hashdocsettings path: $HASHDOCSETTINGS_PATH"
 echo "Heatmap scale max: $HEATMAP_SCALE_MAX"
 echo "Day start time: $DAY_START_TIME"
 echo "Timezone: $TIMEZONE"
+echo "Title: $TITLE"
+echo "Min pages per day: $MIN_PAGES_PER_DAY"
+echo "Min time per day: $MIN_TIME_PER_DAY"
 
 # Validate that at least one path is provided
 if [[ -z "$BOOKS_PATH" || "$BOOKS_PATH" == "" ]] && [[ -z "$DATABASE_PATH" || "$DATABASE_PATH" == "" ]]; then
@@ -83,6 +93,31 @@ fi
 # Add optional timezone if provided
 if [ -n "$TIMEZONE" ] && [ "$TIMEZONE" != "" ]; then
     COMMAND="$COMMAND --timezone \"$TIMEZONE\""
+fi
+
+# Add optional docsettings-path if provided
+if [ -n "$DOCSETTINGS_PATH" ] && [ "$DOCSETTINGS_PATH" != "" ]; then
+    COMMAND="$COMMAND --docsettings-path \"$DOCSETTINGS_PATH\""
+fi
+
+# Add optional hashdocsettings-path if provided
+if [ -n "$HASHDOCSETTINGS_PATH" ] && [ "$HASHDOCSETTINGS_PATH" != "" ]; then
+    COMMAND="$COMMAND --hashdocsettings-path \"$HASHDOCSETTINGS_PATH\""
+fi
+
+# Add optional title if provided
+if [ -n "$TITLE" ] && [ "$TITLE" != "" ]; then
+    COMMAND="$COMMAND --title \"$TITLE\""
+fi
+
+# Add optional min-pages-per-day if provided
+if [ -n "$MIN_PAGES_PER_DAY" ] && [ "$MIN_PAGES_PER_DAY" != "" ]; then
+    COMMAND="$COMMAND --min-pages-per-day $MIN_PAGES_PER_DAY"
+fi
+
+# Add optional min-time-per-day if provided
+if [ -n "$MIN_TIME_PER_DAY" ] && [ "$MIN_TIME_PER_DAY" != "" ]; then
+    COMMAND="$COMMAND --min-time-per-day \"$MIN_TIME_PER_DAY\""
 fi
 
 echo "Running: $COMMAND"

@@ -51,9 +51,26 @@ Click the Home Assistant My button below to open the add-on on your Home Assista
 
 ### Optional Configuration
 
+- **docsettings_path**: Path to KOReader's docsettings folder for users who store metadata separately
+  - Example: `/share/koreader/docsettings`
+  - Requires `books_path` to be set
+  - Mutually exclusive with `hashdocsettings_path`
+  - Use this if your KoReader metadata is stored in a separate docsettings folder
+
+- **hashdocsettings_path**: Path to KOReader's hashdocsettings folder for users who store metadata by content hash
+  - Example: `/share/koreader/hashdocsettings`
+  - Requires `books_path` to be set
+  - Mutually exclusive with `docsettings_path`
+  - Use this if your KoReader metadata is stored using content hash-based naming
+
 - **include_unread**: Include unread books (EPUBs without KoReader metadata) in the generated site
   - Default: `false`
   - Set to `true` to show all EPUB files, even those you haven't opened in KoReader yet
+
+- **title**: Custom site title
+  - Default: `"KoShelf"`
+  - Example: `"My Reading Library"`
+  - Sets the title displayed on your KoShelf site
 
 - **heatmap_scale_max**: Maximum value for heatmap color intensity scaling
   - Default: `"auto"`
@@ -69,23 +86,43 @@ Click the Home Assistant My button below to open the add-on on your Home Assista
   - Default: system local timezone
   - Examples: `"Australia/Sydney"`, `"America/New_York"`, `"Europe/Berlin"`
 
+- **min_pages_per_day**: Minimum required pages read per day to be counted in statistics
+  - Example: `10`
+  - Optional integer value
+  - Days with fewer pages read will not be counted in statistics
+
+- **min_time_per_day**: Minimum required reading time per day to be counted in statistics
+  - Examples: `"15m"`, `"1h"`, `"30m"`
+  - Optional duration value
+  - Days with less reading time will not be counted in statistics
+
+**Note**: If both `min_pages_per_day` and `min_time_per_day` are provided, a day is counted if either condition is met.
+
 ### Example Configuration
 
 ```yaml
 books_path: /share/books
 database_path: /share/koreader/statistics.sqlite3
+docsettings_path: /share/koreader/docsettings
 include_unread: true
+title: "My Reading Library"
 heatmap_scale_max: "auto"
 day_start_time: "04:00"
 timezone: "Australia/Sydney"
+min_pages_per_day: 10
+min_time_per_day: "15m"
 ```
 
 ## File Structure Expected
 
-This addon expects your books to be organized like this:
+KoShelf supports the three ways KOReader can store metadata:
+
+### Option 1: Metadata alongside books (Default, Recommended)
+
+By default, KOReader creates `.sdr` folders next to each book file:
 
 ```
-/share/books/  (or your configured path)
+/share/books/  (configured as books_path)
 ├── Book Title.epub
 ├── Book Title.sdr/
 │   └── metadata.epub.lua
@@ -96,6 +133,54 @@ This addon expects your books to be organized like this:
 ```
 
 The `.sdr` directories are automatically created by KoReader when you read books and make highlights/annotations.
+
+**Configuration**: Just set `books_path` - no additional paths needed.
+
+### Option 2: Hashdocsettings
+
+If you select "hashdocsettings" in KOReader settings, metadata is stored in a central folder organized by content hash with two-character subdirectories:
+
+```
+/share/books/
+├── Book Title.epub
+├── Another Book.epub
+└── ...
+
+/share/koreader/hashdocsettings/  (configured as hashdocsettings_path)
+├── 57/
+│   └── 570615f811d504e628db1ef262bea270.sdr/
+│       └── metadata.epub.lua
+└── a3/
+    └── a3b2c1d4e5f6...sdr/
+        └── metadata.epub.lua
+```
+
+**Configuration**: Set both `books_path` and `hashdocsettings_path`.
+
+### Option 3: Docsettings
+
+If you select "docsettings" in KOReader settings, KOReader mirrors your book folder structure in a central folder:
+
+```
+/share/books/
+├── Book Title.epub
+├── Another Book.epub
+└── ...
+
+/share/koreader/docsettings/  (configured as docsettings_path)
+└── home/
+    └── user/
+        └── Books/
+            ├── Book Title.sdr/
+            │   └── metadata.epub.lua
+            └── Another Book.sdr/
+                └── metadata.epub.lua
+```
+
+> [!NOTE]
+> Unlike KOReader, KOShelf matches books by filename only, since the folder structure reflects the device path (which may differ from your local path). If you have multiple books with the same filename, KOShelf will show an error - use hashdocsettings or the default book folder method instead.
+
+**Configuration**: Set both `books_path` and `docsettings_path`.
 
 ## Accessing the Web Interface
 

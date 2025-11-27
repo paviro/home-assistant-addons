@@ -1,6 +1,6 @@
 name: "KoShelf"
 description: "Transform your KOReader library into a beautiful reading dashboard with statistics."
-version: "1.1.0"
+version: "1.2.0"
 slug: "koshelf"
 init: false
 arch:
@@ -13,16 +13,26 @@ map:
 ports:
   38492/tcp: 38492
 options:
+  title: ""
   include_unread: false
   books_path: ""
   database_path: ""
+  docsettings_path: ""
+  hashdocsettings_path: ""
   heatmap_scale_max: "auto"
   day_start_time: ""
   timezone: ""
+  min_pages_per_day: ""
+  min_time_per_day: ""
 schema:
+  title: str?
   books_path: str?
   database_path: str?
+  docsettings_path: str?
+  hashdocsettings_path: str?
   include_unread: bool
   heatmap_scale_max: str
   day_start_time: str?
   timezone: str?
+  min_pages_per_day: int?
+  min_time_per_day: str?
