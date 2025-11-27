@@ -8,7 +8,7 @@ RUN apk add --no-cache \
     unzip
 
 # Set the version
-ARG KOSHELF_VERSION=1.2.0
+ARG KOSHELF_VERSION=1.2.2
 
 # Detect architecture and libc, then download appropriate binary
 RUN ARCH=$(uname -m) && \
