@@ -1,6 +1,6 @@
 name: "KoShelf"
 description: "Transform your KOReader library into a beautiful reading dashboard with statistics."
-version: "1.2.0"
+version: "1.2.1"
 slug: "koshelf"
 init: false
 arch:
@@ -22,7 +22,7 @@ options:
   heatmap_scale_max: "auto"
   day_start_time: ""
   timezone: ""
-  min_pages_per_day: ""
+  min_pages_per_day: 0
   min_time_per_day: ""
 schema:
   title: str?
