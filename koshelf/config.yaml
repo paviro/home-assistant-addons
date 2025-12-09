@@ -14,7 +14,8 @@ ports:
   38492/tcp: 38492
 options:
   title: ""
-  include_unread: false
+  include_unread: true
+  include_all_stats: false
   books_path: ""
   database_path: ""
   docsettings_path: ""
@@ -31,6 +32,7 @@ schema:
   docsettings_path: str?
   hashdocsettings_path: str?
   include_unread: bool
+  include_all_stats: bool
   heatmap_scale_max: str
   day_start_time: str?
   timezone: str?

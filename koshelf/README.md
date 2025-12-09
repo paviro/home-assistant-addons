@@ -67,6 +67,11 @@ Click the Home Assistant My button below to open the add-on on your Home Assista
   - Default: `false`
   - Set to `true` to show all EPUB files, even those you haven't opened in KoReader yet
 
+- **include_all_stats**: Include statistics for all books in the database
+  - Default: `false`
+  - By default, statistics are filtered to only include books present in your `books_path` directory. This prevents deleted books or external files (like Wallabag articles) from skewing your recap and statistics.
+  - Set to `true` to include statistics for all books in the database, regardless of whether they exist in your library
+
 - **title**: Custom site title
   - Default: `"KoShelf"`
   - Example: `"My Reading Library"`

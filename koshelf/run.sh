@@ -5,6 +5,7 @@ echo "Starting koshelf addon..."
 # Get configuration from addon
 BOOKS_PATH=$(bashio::config 'books_path')
 INCLUDE_UNREAD=$(bashio::config 'include_unread')
+INCLUDE_ALL_STATS=$(bashio::config 'include_all_stats')
 DATABASE_PATH=$(bashio::config 'database_path')
 DOCSETTINGS_PATH=$(bashio::config 'docsettings_path')
 HASHDOCSETTINGS_PATH=$(bashio::config 'hashdocsettings_path')
@@ -20,6 +21,7 @@ MIN_TIME_PER_DAY=$(bashio::config 'min_time_per_day')
 
 echo "Books path: $BOOKS_PATH"
 echo "Include unread: $INCLUDE_UNREAD"
+echo "Include all stats: $INCLUDE_ALL_STATS"
 echo "Database path: $DATABASE_PATH"
 echo "Docsettings path: $DOCSETTINGS_PATH"
 echo "Hashdocsettings path: $HASHDOCSETTINGS_PATH"
@@ -80,6 +82,11 @@ fi
 # Add optional --include-unread flag
 if [ "$INCLUDE_UNREAD" = "true" ]; then
     COMMAND="$COMMAND --include-unread"
+fi
+
+# Add optional --include-all-stats flag
+if [ "$INCLUDE_ALL_STATS" = "true" ]; then
+    COMMAND="$COMMAND --include-all-stats"
 fi
 
 # Always include --heatmap-scale-max flag
