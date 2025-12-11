@@ -102,8 +102,8 @@ Click the Home Assistant My button below to open the add-on on your Home Assista
   - Books with less reading time will not be counted in statistics
 
 - **language**: Language for UI translations
-  - Default: `"en"`
-  - Examples: `"en"`, `"de"`
+  - Default: `"en_US"`
+  - Examples: `"en_US"`, `"de_DE"`
   - Sets the interface language for the generated site
 
 **Note**: If both `min_pages_per_day` and `min_time_per_day` are provided, a book is added to the statistics if either condition is met within a given day.

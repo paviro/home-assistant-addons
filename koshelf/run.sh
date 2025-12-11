@@ -34,6 +34,28 @@ echo "Min pages per day: $MIN_PAGES_PER_DAY"
 echo "Min time per day: $MIN_TIME_PER_DAY"
 echo "Language: $LANGUAGE"
 
+# Validate language code
+if [[ "$LANGUAGE" =~ ^[a-zA-Z]{2}$ ]]; then
+    echo ""
+    echo "║"
+    echo "║                                ⚠️  ERROR  ⚠️"
+    echo "║"
+    echo "║"
+    echo "║  🚨 INVALID LANGUAGE CODE 🚨"
+    echo "║"
+    echo "║  You have configured a two-letter language code: '$LANGUAGE'"
+    echo "║"
+    echo "║  You must use a full locale code (e.g., 'en_US', 'de_DE')"
+    echo "║  to ensure correct date formatting and regional settings."
+    echo "║"
+    echo "║  The application cannot start with this configuration."
+    echo "║"
+    echo "║"
+    echo ""
+    bashio::log.fatal "Invalid language code '$LANGUAGE' - full locale required (e.g., en_US)"
+    bashio::exit.nok
+fi
+
 # Validate that at least one path is provided
 if [[ -z "$BOOKS_PATH" || "$BOOKS_PATH" == "" ]] && [[ -z "$DATABASE_PATH" || "$DATABASE_PATH" == "" ]]; then
     echo ""

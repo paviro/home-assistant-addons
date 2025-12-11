@@ -1,6 +1,6 @@
 name: "KoShelf"
 description: "Transform your KOReader library into a beautiful reading dashboard with statistics."
-version: "1.5.0"
+version: "1.5.1"
 slug: "koshelf"
 init: false
 arch:
@@ -25,7 +25,7 @@ options:
   timezone: ""
   min_pages_per_day: ""
   min_time_per_day: "30s"
-  language: "en"
+  language: "en_US"
 schema:
   title: str?
   books_path: str?
