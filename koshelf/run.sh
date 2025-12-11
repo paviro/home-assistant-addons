@@ -18,6 +18,7 @@ TIMEZONE=$(bashio::config 'timezone')
 TITLE=$(bashio::config 'title')
 MIN_PAGES_PER_DAY=$(bashio::config 'min_pages_per_day')
 MIN_TIME_PER_DAY=$(bashio::config 'min_time_per_day')
+LANGUAGE=$(bashio::config 'language')
 
 echo "Books path: $BOOKS_PATH"
 echo "Include unread: $INCLUDE_UNREAD"
@@ -31,6 +32,7 @@ echo "Timezone: $TIMEZONE"
 echo "Title: $TITLE"
 echo "Min pages per day: $MIN_PAGES_PER_DAY"
 echo "Min time per day: $MIN_TIME_PER_DAY"
+echo "Language: $LANGUAGE"
 
 # Validate that at least one path is provided
 if [[ -z "$BOOKS_PATH" || "$BOOKS_PATH" == "" ]] && [[ -z "$DATABASE_PATH" || "$DATABASE_PATH" == "" ]]; then
@@ -125,6 +127,11 @@ fi
 # Add optional min-time-per-day if provided
 if [ -n "$MIN_TIME_PER_DAY" ] && [ "$MIN_TIME_PER_DAY" != "" ]; then
     COMMAND="$COMMAND --min-time-per-day \"$MIN_TIME_PER_DAY\""
+fi
+
+# Add optional language if provided
+if [ -n "$LANGUAGE" ] && [ "$LANGUAGE" != "" ]; then
+    COMMAND="$COMMAND --language \"$LANGUAGE\""
 fi
 
 echo "Running: $COMMAND"

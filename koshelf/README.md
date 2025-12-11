@@ -101,6 +101,11 @@ Click the Home Assistant My button below to open the add-on on your Home Assista
   - Optional duration value
   - Books with less reading time will not be counted in statistics
 
+- **language**: Language for UI translations
+  - Default: `"en"`
+  - Examples: `"en"`, `"de"`
+  - Sets the interface language for the generated site
+
 **Note**: If both `min_pages_per_day` and `min_time_per_day` are provided, a book is added to the statistics if either condition is met within a given day.
 
 ### Example Configuration
@@ -116,6 +121,7 @@ day_start_time: "04:00"
 timezone: "Australia/Sydney"
 min_pages_per_day: 10
 min_time_per_day: "15m"
+language: "en"
 ```
 
 ## File Structure Expected
