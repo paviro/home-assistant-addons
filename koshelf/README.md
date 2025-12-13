@@ -39,9 +39,10 @@ Click the Home Assistant My button below to open the add-on on your Home Assista
 
 **At least one** (or both) of the following must be configured:
 
-- **books_path**: Path to your folder containing EPUB files and KoReader metadata
-  - Example: `/share/books` or `/media/books`
+- **library_path**: One or more paths to folders containing EPUB files and KoReader metadata
+  - Examples: `/share/books`, `/media/books`
   - This should point to where your EPUB files and their corresponding `.sdr` folders are located
+  - Supports multiple folders (the add-on will pass multiple `--library-path` flags)
   - Required for book library functionality
 
 - **database_path**: Path to the KoReader statistics.sqlite3 file for reading stats
@@ -49,17 +50,20 @@ Click the Home Assistant My button below to open the add-on on your Home Assista
   - This enables detailed reading statistics, activity heatmaps, and session tracking
   - Required for statistics functionality
 
+> [!NOTE]
+> `books_path` is deprecated. If you already have `books_path` configured, the add-on will automatically treat it as a single `library_path` for compatibility, but you should migrate to `library_path`.
+
 ### Optional Configuration
 
 - **docsettings_path**: Path to KOReader's docsettings folder for users who store metadata separately
   - Example: `/share/koreader/docsettings`
-  - Requires `books_path` to be set
+  - Requires `library_path` to be set
   - Mutually exclusive with `hashdocsettings_path`
   - Use this if your KoReader metadata is stored in a separate docsettings folder
 
 - **hashdocsettings_path**: Path to KOReader's hashdocsettings folder for users who store metadata by content hash
   - Example: `/share/koreader/hashdocsettings`
-  - Requires `books_path` to be set
+  - Requires `library_path` to be set
   - Mutually exclusive with `docsettings_path`
   - Use this if your KoReader metadata is stored using content hash-based naming
 
@@ -69,7 +73,7 @@ Click the Home Assistant My button below to open the add-on on your Home Assista
 
 - **include_all_stats**: Include statistics for all books in the database
   - Default: `false`
-  - By default, statistics are filtered to only include books present in your `books_path` directory. This prevents deleted books or external files (like Wallabag articles) from skewing your recap and statistics.
+  - By default, statistics are filtered to only include books present in your configured `library_path` directories. This prevents deleted books or external files (like Wallabag articles) from skewing your recap and statistics.
   - Set to `true` to include statistics for all books in the database, regardless of whether they exist in your library
 
 - **title**: Custom site title
@@ -111,7 +115,8 @@ Click the Home Assistant My button below to open the add-on on your Home Assista
 ### Example Configuration
 
 ```yaml
-books_path: /share/books
+library_path:
+  - /share/books
 database_path: /share/koreader/statistics.sqlite3
 docsettings_path: /share/koreader/docsettings
 include_unread: true
@@ -133,7 +138,7 @@ KoShelf supports the three ways KOReader can store metadata:
 By default, KOReader creates `.sdr` folders next to each book file:
 
 ```
-/share/books/  (configured as books_path)
+/share/books/  (configured as a library_path entry)
 ├── Book Title.epub
 ├── Book Title.sdr/
 │   └── metadata.epub.lua
@@ -145,7 +150,7 @@ By default, KOReader creates `.sdr` folders next to each book file:
 
 The `.sdr` directories are automatically created by KoReader when you read books and make highlights/annotations.
 
-**Configuration**: Just set `books_path` - no additional paths needed.
+**Configuration**: Set `library_path` to include your book folder (no additional paths needed).
 
 ### Option 2: Hashdocsettings
 
@@ -166,7 +171,7 @@ If you select "hashdocsettings" in KOReader settings, metadata is stored in a ce
         └── metadata.epub.lua
 ```
 
-**Configuration**: Set both `books_path` and `hashdocsettings_path`.
+**Configuration**: Set both `library_path` and `hashdocsettings_path`.
 
 ### Option 3: Docsettings
 
@@ -191,7 +196,7 @@ If you select "docsettings" in KOReader settings, KOReader mirrors your book fol
 > [!NOTE]
 > Unlike KOReader, KOShelf matches books by filename only, since the folder structure reflects the device path (which may differ from your local path). If you have multiple books with the same filename, KOShelf will show an error - use hashdocsettings or the default book folder method instead.
 
-**Configuration**: Set both `books_path` and `docsettings_path`.
+**Configuration**: Set both `library_path` and `docsettings_path`.
 
 ## Accessing the Web Interface
 

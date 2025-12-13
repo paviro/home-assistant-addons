@@ -20,7 +20,24 @@ MIN_PAGES_PER_DAY=$(bashio::config 'min_pages_per_day')
 MIN_TIME_PER_DAY=$(bashio::config 'min_time_per_day')
 LANGUAGE=$(bashio::config 'language')
 
-echo "Books path: $BOOKS_PATH"
+# Build list of library paths (supports multiple values)
+LIBRARY_PATHS=()
+if bashio::config.has_value 'library_path'; then
+    # library_path is an array in config.yaml; parse it into a bash array
+    while IFS= read -r p; do
+        if [ -n "$p" ] && [ "$p" != "null" ]; then
+            LIBRARY_PATHS+=("$p")
+        fi
+    done < <(bashio::addon.config | jq -r '.library_path[]? // empty')
+fi
+
+# Backwards-compat: migrate books_path -> library_path if user hasn't set library_path
+if [ ${#LIBRARY_PATHS[@]} -eq 0 ] && [ -n "$BOOKS_PATH" ] && [ "$BOOKS_PATH" != "" ]; then
+    bashio::log.warning "Deprecated config 'books_path' detected; please migrate to 'library_path'. Using books_path as a single library path for now."
+    LIBRARY_PATHS+=("$BOOKS_PATH")
+fi
+
+echo "Library paths: ${LIBRARY_PATHS[*]}"
 echo "Include unread: $INCLUDE_UNREAD"
 echo "Include all stats: $INCLUDE_ALL_STATS"
 echo "Database path: $DATABASE_PATH"
@@ -57,7 +74,7 @@ if [[ "$LANGUAGE" =~ ^[a-zA-Z]{2}$ ]]; then
 fi
 
 # Validate that at least one path is provided
-if [[ -z "$BOOKS_PATH" || "$BOOKS_PATH" == "" ]] && [[ -z "$DATABASE_PATH" || "$DATABASE_PATH" == "" ]]; then
+if [ ${#LIBRARY_PATHS[@]} -eq 0 ] && [[ -z "$DATABASE_PATH" || "$DATABASE_PATH" == "" ]]; then
     echo ""
     echo "║"
     echo "║                                ⚠️  ERROR  ⚠️"
@@ -67,19 +84,21 @@ if [[ -z "$BOOKS_PATH" || "$BOOKS_PATH" == "" ]] && [[ -z "$DATABASE_PATH" || "$
     echo "║"
     echo "║  At least ONE of the following must be configured:"
     echo "║"
-    echo "║  📚 books_path     - Path to your EPUB files and KoReader metadata"
+    echo "║  📚 library_path   - One or more paths to your ebook and comic files"
     echo "║  📊 database_path  - Path to KoReader's statistics.sqlite3 file"
     echo "║"
     echo "║  Example configurations:"
     echo "║"
-    echo "║  Option 1 - Books only:"
-    echo "║    books_path: /share/books"
+    echo "║  Option 1 - Library only:"
+    echo "║    library_path:"
+    echo "║      - /share/books"
     echo "║"
     echo "║  Option 2 - Statistics only:"
     echo "║    database_path: /share/koreader/statistics.sqlite3"
     echo "║"
     echo "║  Option 3 - Both (recommended):"
-    echo "║    books_path: /share/books"
+    echo "║    library_path:"
+    echo "║      - /share/books"
     echo "║    database_path: /share/koreader/statistics.sqlite3"
     echo "║"
     echo "║  💡 Remember: Files must be under /media/ or /share/ directories!"
@@ -90,73 +109,75 @@ if [[ -z "$BOOKS_PATH" || "$BOOKS_PATH" == "" ]] && [[ -z "$DATABASE_PATH" || "$
     bashio::exit.nok
 fi
 
-# Start building command with port
-COMMAND="/usr/local/bin/koshelf --port 38492"
+# Start building command with port (use array to avoid quoting/escaping issues)
+COMMAND=(/usr/local/bin/koshelf --port 38492)
 
-# Add books-path if provided
-if [ -n "$BOOKS_PATH" ] && [ "$BOOKS_PATH" != "" ]; then
-    COMMAND="$COMMAND --books-path \"$BOOKS_PATH\""
+# Add one or more --library-path flags
+if [ ${#LIBRARY_PATHS[@]} -gt 0 ]; then
+    for p in "${LIBRARY_PATHS[@]}"; do
+        COMMAND+=(--library-path "$p")
+    done
 fi
 
 # Add statistics-db if provided
 if [ -n "$DATABASE_PATH" ] && [ "$DATABASE_PATH" != "" ]; then
-    COMMAND="$COMMAND --statistics-db \"$DATABASE_PATH\""
+    COMMAND+=(--statistics-db "$DATABASE_PATH")
 fi
 
-# Add optional --include-unread flag
-if [ "$INCLUDE_UNREAD" = "true" ]; then
-    COMMAND="$COMMAND --include-unread"
+# Add optional --include-unread flag (only when library paths are provided)
+if [ "$INCLUDE_UNREAD" = "true" ] && [ ${#LIBRARY_PATHS[@]} -gt 0 ]; then
+    COMMAND+=(--include-unread)
 fi
 
 # Add optional --include-all-stats flag
 if [ "$INCLUDE_ALL_STATS" = "true" ]; then
-    COMMAND="$COMMAND --include-all-stats"
+    COMMAND+=(--include-all-stats)
 fi
 
 # Always include --heatmap-scale-max flag
-COMMAND="$COMMAND --heatmap-scale-max \"$HEATMAP_SCALE_MAX\""
+COMMAND+=(--heatmap-scale-max "$HEATMAP_SCALE_MAX")
 
 # Add optional day start time if provided
 if [ -n "$DAY_START_TIME" ] && [ "$DAY_START_TIME" != "" ]; then
-    COMMAND="$COMMAND --day-start-time \"$DAY_START_TIME\""
+    COMMAND+=(--day-start-time "$DAY_START_TIME")
 fi
 
 # Add optional timezone if provided
 if [ -n "$TIMEZONE" ] && [ "$TIMEZONE" != "" ]; then
-    COMMAND="$COMMAND --timezone \"$TIMEZONE\""
+    COMMAND+=(--timezone "$TIMEZONE")
 fi
 
 # Add optional docsettings-path if provided
 if [ -n "$DOCSETTINGS_PATH" ] && [ "$DOCSETTINGS_PATH" != "" ]; then
-    COMMAND="$COMMAND --docsettings-path \"$DOCSETTINGS_PATH\""
+    COMMAND+=(--docsettings-path "$DOCSETTINGS_PATH")
 fi
 
 # Add optional hashdocsettings-path if provided
 if [ -n "$HASHDOCSETTINGS_PATH" ] && [ "$HASHDOCSETTINGS_PATH" != "" ]; then
-    COMMAND="$COMMAND --hashdocsettings-path \"$HASHDOCSETTINGS_PATH\""
+    COMMAND+=(--hashdocsettings-path "$HASHDOCSETTINGS_PATH")
 fi
 
 # Add optional title if provided
 if [ -n "$TITLE" ] && [ "$TITLE" != "" ]; then
-    COMMAND="$COMMAND --title \"$TITLE\""
+    COMMAND+=(--title "$TITLE")
 fi
 
 # Add optional min-pages-per-day if provided
 if [ -n "$MIN_PAGES_PER_DAY" ] && [ "$MIN_PAGES_PER_DAY" != "" ]; then
-    COMMAND="$COMMAND --min-pages-per-day $MIN_PAGES_PER_DAY"
+    COMMAND+=(--min-pages-per-day "$MIN_PAGES_PER_DAY")
 fi
 
 # Add optional min-time-per-day if provided
 if [ -n "$MIN_TIME_PER_DAY" ] && [ "$MIN_TIME_PER_DAY" != "" ]; then
-    COMMAND="$COMMAND --min-time-per-day \"$MIN_TIME_PER_DAY\""
+    COMMAND+=(--min-time-per-day "$MIN_TIME_PER_DAY")
 fi
 
 # Add optional language if provided
 if [ -n "$LANGUAGE" ] && [ "$LANGUAGE" != "" ]; then
-    COMMAND="$COMMAND --language \"$LANGUAGE\""
+    COMMAND+=(--language "$LANGUAGE")
 fi
 
-echo "Running: $COMMAND"
+echo "Running: ${COMMAND[*]}"
 
 # Run koshelf
-eval $COMMAND 
+exec "${COMMAND[@]}"

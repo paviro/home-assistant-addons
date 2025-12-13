@@ -1,14 +1,13 @@
 ARG BUILD_FROM
 FROM $BUILD_FROM
 
-# Install required packages
+# Install required packages (bashio is already included in the HA base image)
 RUN apk add --no-cache \
-    bash \
     curl \
     unzip
 
 # Set the version
-ARG KOSHELF_VERSION=1.6.0
+ARG KOSHELF_VERSION=1.7.0
 
 # Detect architecture and libc, then download appropriate binary
 RUN ARCH=$(uname -m) && \
