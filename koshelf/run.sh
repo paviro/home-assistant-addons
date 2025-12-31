@@ -19,6 +19,13 @@ TITLE=$(bashio::config 'title')
 MIN_PAGES_PER_DAY=$(bashio::config 'min_pages_per_day')
 MIN_TIME_PER_DAY=$(bashio::config 'min_time_per_day')
 LANGUAGE=$(bashio::config 'language')
+DEBUG_LOG=$(bashio::config 'debug_log')
+
+# Set RUST_LOG if debug logging is enabled
+if [ "$DEBUG_LOG" = "true" ]; then
+    export RUST_LOG=debug
+    echo "Debug logging enabled (RUST_LOG=debug)"
+fi
 
 # Build list of library paths (supports multiple values)
 LIBRARY_PATHS=()
