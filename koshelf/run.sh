@@ -10,9 +10,6 @@ DATABASE_PATH=$(bashio::config 'database_path')
 DOCSETTINGS_PATH=$(bashio::config 'docsettings_path')
 HASHDOCSETTINGS_PATH=$(bashio::config 'hashdocsettings_path')
 HEATMAP_SCALE_MAX=$(bashio::config 'heatmap_scale_max')
-if [ -z "$HEATMAP_SCALE_MAX" ] || [ "$HEATMAP_SCALE_MAX" == "" ]; then
-    HEATMAP_SCALE_MAX="auto"
-fi
 DAY_START_TIME=$(bashio::config 'day_start_time')
 TIMEZONE=$(bashio::config 'timezone')
 TITLE=$(bashio::config 'title')
@@ -143,8 +140,10 @@ if [ "$INCLUDE_ALL_STATS" = "true" ]; then
     COMMAND+=(--include-all-stats)
 fi
 
-# Always include --heatmap-scale-max flag
-COMMAND+=(--heatmap-scale-max "$HEATMAP_SCALE_MAX")
+# Add optional heatmap-scale-max if provided
+if [ -n "$HEATMAP_SCALE_MAX" ] && [ "$HEATMAP_SCALE_MAX" != "" ]; then
+    COMMAND+=(--heatmap-scale-max "$HEATMAP_SCALE_MAX")
+fi
 
 # Add optional day start time if provided
 if [ -n "$DAY_START_TIME" ] && [ "$DAY_START_TIME" != "" ]; then
