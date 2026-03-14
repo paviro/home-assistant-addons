@@ -57,6 +57,7 @@ echo "Title: $TITLE"
 echo "Min pages per day: $MIN_PAGES_PER_DAY"
 echo "Min time per day: $MIN_TIME_PER_DAY"
 echo "Language: $LANGUAGE"
+echo "Data path: /data (persistent)"
 
 # Validate language code
 if [[ "$LANGUAGE" =~ ^[a-zA-Z]{2}$ ]]; then
@@ -116,8 +117,9 @@ if [ ${#LIBRARY_PATHS[@]} -eq 0 ] && [[ -z "$DATABASE_PATH" || "$DATABASE_PATH" 
     bashio::exit.nok
 fi
 
-# Start building command with port (use array to avoid quoting/escaping issues)
-COMMAND=(/usr/local/bin/koshelf --port 38492)
+# Start building command with port and persistent data path
+# /data is the HA addon persistent directory — survives reboots and updates
+COMMAND=(/usr/local/bin/koshelf --port 38492 --data-path /data)
 
 # Add one or more --library-path flags
 if [ ${#LIBRARY_PATHS[@]} -gt 0 ]; then
