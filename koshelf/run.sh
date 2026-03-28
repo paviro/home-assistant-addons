@@ -3,7 +3,7 @@
 echo "Starting koshelf addon..."
 
 # Get configuration from addon
-BOOKS_PATH=$(bashio::config 'books_path')
+
 INCLUDE_UNREAD=$(bashio::config 'include_unread')
 INCLUDE_ALL_STATS=$(bashio::config 'include_all_stats')
 DATABASE_PATH=$(bashio::config 'database_path')
@@ -49,11 +49,6 @@ if bashio::config.has_value 'trusted_proxies'; then
     done < <(bashio::addon.config | jq -r '.trusted_proxies[]? // empty')
 fi
 
-# Backwards-compat: migrate books_path -> library_path if user hasn't set library_path
-if [ ${#LIBRARY_PATHS[@]} -eq 0 ] && [ -n "$BOOKS_PATH" ] && [ "$BOOKS_PATH" != "" ]; then
-    bashio::log.warning "Deprecated config 'books_path' detected; please migrate to 'library_path'. Using books_path as a single library path for now."
-    LIBRARY_PATHS+=("$BOOKS_PATH")
-fi
 
 echo "Library paths: ${LIBRARY_PATHS[*]}"
 echo "Include unread: $INCLUDE_UNREAD"

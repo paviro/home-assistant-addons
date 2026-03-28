@@ -1,22 +1,26 @@
 # KoShelf Home Assistant Addon
 
-A Home Assistant addon that runs [KoShelf](https://github.com/paviro/KOShelf) - a beautiful static website generator for your KoReader library, showcasing your ebook collection with highlights, annotations, and reading progress.
+A Home Assistant addon that runs [KoShelf](https://github.com/paviro/KOShelf) - a beautiful reading dashboard for your KoReader library, showcasing your ebook and comic collection with an integrated reader, highlights, annotations, reading statistics, and more.
 
 ## About
 
-This addon packages the KoShelf Rust CLI tool as a Home Assistant addon, making it easy to run KoShelf on your Home Assistant instance. It automatically downloads the appropriate KoShelf binary for your system architecture and runs it in web server mode.
+This addon packages the KoShelf Rust CLI tool as a Home Assistant addon, making it easy to run KoShelf on your Home Assistant instance. It automatically downloads the appropriate KoShelf binary for your system architecture and runs it in server mode with live file watching and real-time updates.
 
 ## Features
 
-- 📚 **Book Library Overview**: Displays your currently reading, completed and unread books (EPUBs only!)
+- 📚 **Book Library Overview**: Displays your currently reading, completed, and unread books (supports EPUB, FB2/FB2.zip, MOBI, CBZ, and CBR)
+- 📖 **Integrated Reader**: Open EPUB, FB2, MOBI, and CBZ files directly in the browser with keyboard navigation and progress scrubbing
 - 🎨 **Modern UI**: Beautiful design powered by Tailwind CSS with clean typography and responsive layout
-- 📝 **Annotations & Highlights**: Shows all your KoReader highlights and notes with elegant formatting
-- 📖 **Book Details**: Individual pages for each book with metadata and organized annotations
+- 📝 **Annotations & Highlights**: Shows all your KoReader highlights and notes with elegant formatting, with inline display in the reader
+- 📖 **Book Details**: Individual pages for each book with metadata, organized annotations, and file downloads
 - 📊 **Reading Statistics**: Track your reading habits with detailed statistics including reading time, pages read, activity heatmaps, and weekly breakdowns
 - 📈 **Per-Book Statistics**: Detailed statistics for each book including session count, average session duration, reading speed, and last read date
+- 📅 **Calendar & Recap**: Monthly reading calendar and yearly recap timeline with social sharing images
+- 🔄 **Writeback**: Optionally sync metadata changes back to your KoReader sidecar files
+- 🔐 **Authentication**: Optional password protection with session management and login rate limiting
 - 🔍 **Search & Filter**: Search through your library by title, author, or series, with filters for reading status
-- 🚀 **Web Interface**: Runs as a web server accessible through Home Assistant
-- 📱 **Responsive**: Optimized for desktop, tablet, and mobile with adaptive grid layouts
+- 🚀 **Live Server**: Runs as a web server with file watching and real-time updates via SSE
+- 📱 **PWA & Responsive**: Installable as a web app, optimized for desktop, tablet, and mobile
 
 ## Installation
 
@@ -39,9 +43,9 @@ Click the Home Assistant My button below to open the add-on on your Home Assista
 
 **At least one** (or both) of the following must be configured:
 
-- **library_path**: One or more paths to folders containing EPUB files and KoReader metadata
+- **library_path**: One or more paths to folders containing your book/comic files and KoReader metadata
   - Examples: `/share/books`, `/media/books`
-  - This should point to where your EPUB files and their corresponding `.sdr` folders are located
+  - This should point to where your files (EPUB, FB2, MOBI, CBZ, CBR) are located
   - Supports multiple folders (the add-on will pass multiple `--library-path` flags)
   - Required for book library functionality
 
@@ -49,9 +53,6 @@ Click the Home Assistant My button below to open the add-on on your Home Assista
   - Example: `/share/koreader/statistics.sqlite3` or `/media/koreader/statistics.sqlite3`
   - This enables detailed reading statistics, activity heatmaps, and session tracking
   - Required for statistics functionality
-
-> [!NOTE]
-> `books_path` is deprecated. If you already have `books_path` configured, the add-on will automatically treat it as a single `library_path` for compatibility, but you should migrate to `library_path`.
 
 ### Optional Configuration
 
@@ -67,9 +68,9 @@ Click the Home Assistant My button below to open the add-on on your Home Assista
   - Mutually exclusive with `docsettings_path`
   - Use this if your KoReader metadata is stored using content hash-based naming
 
-- **include_unread**: Include unread books (EPUBs without KoReader metadata) in the generated site
+- **include_unread**: Include unread books (files without KoReader metadata) in the library
   - Default: `false`
-  - Set to `true` to show all EPUB files, even those you haven't opened in KoReader yet
+  - Set to `true` to show all supported files, even those you haven't opened in KoReader yet
 
 - **include_all_stats**: Include statistics for all books in the database
   - Default: `false`
@@ -104,13 +105,39 @@ Click the Home Assistant My button below to open the add-on on your Home Assista
   - Examples: `"15m"`, `"1h"`, `"30m"`
   - Optional duration value
   - Books with less reading time will not be counted in statistics
+  
+  **Note**: If both `min_pages_per_day` and `min_time_per_day` are provided, a book is added to the statistics if either condition is met within a given day.
 
 - **language**: Language for UI translations
   - Default: `"en_US"`
   - Examples: `"en_US"`, `"de_DE"`
-  - Sets the interface language for the generated site
+  - Sets the interface language and date formatting for the site
+  - Must be a full locale code (e.g., `"en_US"`, not `"en"`)
 
-**Note**: If both `min_pages_per_day` and `min_time_per_day` are provided, a book is added to the statistics if either condition is met within a given day.
+- **enable_auth**: Enable password-protected access to KoShelf
+  - Default: `false`
+  - When enabled for the first time, a random password is generated and printed in the addon log
+  - Uses session-based authentication with login rate limiting
+
+- **reset_password**: Request a new random password
+  - Default: `false`
+  - Set to `true` and restart the addon to generate a new password (printed in the addon log)
+  - Automatically resets back to `false` after the password is generated
+
+- **trusted_proxies**: List of trusted reverse proxy IP ranges
+  - Default: `["172.30.32.0/23"]` (Home Assistant internal network)
+  - Required for correct client IP detection when running behind a reverse proxy
+
+- **enable_writeback**: Enable bidirectional metadata sync with KoReader
+  - Default: `false`
+  - When enabled, metadata like ratings, reading status, highlights can be changed in KoShelf and are written back to the KoReader `.sdr` sidecar files
+
+- **ignore_stable_page_metadata**: Skip stable page count metadata from KoReader
+  - Default: `false`
+
+- **debug_log**: Enable verbose Rust debug logging
+  - Default: `false`
+  - Sets `RUST_LOG=debug` for troubleshooting — produces a lot of output
 
 ### Example Configuration
 
@@ -126,7 +153,9 @@ day_start_time: "04:00"
 timezone: "Australia/Sydney"
 min_pages_per_day: 10
 min_time_per_day: "15m"
-language: "en"
+language: "en_US"
+enable_auth: false
+enable_writeback: false
 ```
 
 ## File Structure Expected
@@ -142,9 +171,9 @@ By default, KOReader creates `.sdr` folders next to each book file:
 ├── Book Title.epub
 ├── Book Title.sdr/
 │   └── metadata.epub.lua
-├── Another Book.epub
-├── Another Book.sdr/
-│   └── metadata.epub.lua
+├── Comic.cbz
+├── Comic.sdr/
+│   └── metadata.cbz.lua
 └── ...
 ```
 
@@ -159,7 +188,7 @@ If you select "hashdocsettings" in KOReader settings, metadata is stored in a ce
 ```
 /share/books/
 ├── Book Title.epub
-├── Another Book.epub
+├── Another Book.fb2
 └── ...
 
 /share/koreader/hashdocsettings/  (configured as hashdocsettings_path)
@@ -168,7 +197,7 @@ If you select "hashdocsettings" in KOReader settings, metadata is stored in a ce
 │       └── metadata.epub.lua
 └── a3/
     └── a3b2c1d4e5f6...sdr/
-        └── metadata.epub.lua
+        └── metadata.fb2.lua
 ```
 
 **Configuration**: Set both `library_path` and `hashdocsettings_path`.
@@ -180,7 +209,7 @@ If you select "docsettings" in KOReader settings, KOReader mirrors your book fol
 ```
 /share/books/
 ├── Book Title.epub
-├── Another Book.epub
+├── Another Book.mobi
 └── ...
 
 /share/koreader/docsettings/  (configured as docsettings_path)
@@ -190,7 +219,7 @@ If you select "docsettings" in KOReader settings, KOReader mirrors your book fol
             ├── Book Title.sdr/
             │   └── metadata.epub.lua
             └── Another Book.sdr/
-                └── metadata.epub.lua
+                └── metadata.mobi.lua
 ```
 
 > [!NOTE]
@@ -204,15 +233,23 @@ Once the addon is running, you can access your KoShelf library at:
 - `http://homeassistant.local:38492`
 - `http://[YOUR_HOME_ASSISTANT_IP]:38492`
 
-The addon runs KoShelf in web server mode, which means it will automatically rebuild the site when your book files change.
+The addon runs KoShelf in server mode, which means it will automatically detect changes to your book files and update in real time.
 
 ### Recommended: Use with Nginx Reverse Proxy
 
 For enhanced security, SSL support, and custom domain access, it's highly recommended to use this addon behind a reverse proxy. The [Nginx Proxy Manager addon](https://github.com/hassio-addons/addon-nginx-proxy-manager) provides an easy-to-use interface for setting up reverse proxies in Home Assistant.
 
+## Supported Formats
+
+- **EPUB** (v2 and v3)
+- **FB2 / FB2.zip**
+- **MOBI** (unencrypted)
+- **CBZ**
+- **CBR** (non-Windows only)
+
 ## Supported Data
 
-### From EPUB Files
+### From Book Files
 - Book title, authors, description
 - Cover image, language, publisher
 - Series information (name and number)
@@ -231,6 +268,8 @@ For enhanced security, SSL support, and custom domain access, it's highly recomm
 - Total reading time and pages
 - Weekly reading statistics
 - Reading activity heatmap
+- Monthly calendar and yearly recap
 - Per-book reading sessions and statistics
 - Reading speed calculations
 - Session duration tracking
+- Streaks and completion history
