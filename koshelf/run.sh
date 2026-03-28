@@ -16,6 +16,10 @@ TITLE=$(bashio::config 'title')
 MIN_PAGES_PER_DAY=$(bashio::config 'min_pages_per_day')
 MIN_TIME_PER_DAY=$(bashio::config 'min_time_per_day')
 LANGUAGE=$(bashio::config 'language')
+ENABLE_AUTH=$(bashio::config 'enable_auth')
+RESET_PASSWORD=$(bashio::config 'reset_password')
+ENABLE_WRITEBACK=$(bashio::config 'enable_writeback')
+IGNORE_STABLE_PAGE_METADATA=$(bashio::config 'ignore_stable_page_metadata')
 DEBUG_LOG=$(bashio::config 'debug_log')
 
 # Set RUST_LOG if debug logging is enabled
@@ -33,6 +37,16 @@ if bashio::config.has_value 'library_path'; then
             LIBRARY_PATHS+=("$p")
         fi
     done < <(bashio::addon.config | jq -r '.library_path[]? // empty')
+fi
+
+# Build list of trusted proxies (supports multiple values)
+TRUSTED_PROXIES=()
+if bashio::config.has_value 'trusted_proxies'; then
+    while IFS= read -r p; do
+        if [ -n "$p" ] && [ "$p" != "null" ]; then
+            TRUSTED_PROXIES+=("$p")
+        fi
+    done < <(bashio::addon.config | jq -r '.trusted_proxies[]? // empty')
 fi
 
 # Backwards-compat: migrate books_path -> library_path if user hasn't set library_path
@@ -54,6 +68,10 @@ echo "Title: $TITLE"
 echo "Min pages per day: $MIN_PAGES_PER_DAY"
 echo "Min time per day: $MIN_TIME_PER_DAY"
 echo "Language: $LANGUAGE"
+echo "Enable auth: $ENABLE_AUTH"
+echo "Trusted proxies: ${TRUSTED_PROXIES[*]}"
+echo "Enable writeback: $ENABLE_WRITEBACK"
+echo "Ignore stable page metadata: $IGNORE_STABLE_PAGE_METADATA"
 echo "Data path: /data (persistent)"
 
 # Validate language code
@@ -114,9 +132,25 @@ if [ ${#LIBRARY_PATHS[@]} -eq 0 ] && [[ -z "$DATABASE_PATH" || "$DATABASE_PATH" 
     bashio::exit.nok
 fi
 
+# Handle password reset if requested
+if [ "$RESET_PASSWORD" = "true" ]; then
+    bashio::log.info "Password reset requested — generating new random password..."
+    /usr/local/bin/koshelf set-password --data-path /data --random --overwrite
+
+    # Auto-disable reset_password so it doesn't run again on next restart
+    CURRENT_CONFIG=$(bashio::addon.config)
+    UPDATED_CONFIG=$(echo "$CURRENT_CONFIG" | jq '.reset_password = false')
+    curl -s -X POST \
+        -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" \
+        -H "Content-Type: application/json" \
+        -d "{\"options\": ${UPDATED_CONFIG}}" \
+        "http://supervisor/addons/self/options"
+    bashio::log.info "reset_password has been automatically disabled."
+fi
+
 # Start building command with port and persistent data path
 # /data is the HA addon persistent directory — survives reboots and updates
-COMMAND=(/usr/local/bin/koshelf --port 38492 --data-path /data)
+COMMAND=(/usr/local/bin/koshelf serve --port 38492 --data-path /data)
 
 # Add one or more --library-path flags
 if [ ${#LIBRARY_PATHS[@]} -gt 0 ]; then
@@ -183,6 +217,28 @@ fi
 # Add optional language if provided
 if [ -n "$LANGUAGE" ] && [ "$LANGUAGE" != "" ]; then
     COMMAND+=(--language "$LANGUAGE")
+fi
+
+# Add --enable-auth if enabled
+if [ "$ENABLE_AUTH" = "true" ]; then
+    COMMAND+=(--enable-auth)
+fi
+
+# Add trusted proxy entries
+if [ ${#TRUSTED_PROXIES[@]} -gt 0 ]; then
+    for proxy in "${TRUSTED_PROXIES[@]}"; do
+        COMMAND+=(--trusted-proxies "$proxy")
+    done
+fi
+
+# Add --enable-writeback if enabled
+if [ "$ENABLE_WRITEBACK" = "true" ]; then
+    COMMAND+=(--enable-writeback)
+fi
+
+# Add --ignore-stable-page-metadata if enabled
+if [ "$IGNORE_STABLE_PAGE_METADATA" = "true" ]; then
+    COMMAND+=(--ignore-stable-page-metadata)
 fi
 
 echo "Running: ${COMMAND[*]}"
