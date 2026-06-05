@@ -56,6 +56,11 @@ Click the Home Assistant My button below to open the add-on on your Home Assista
 
 ### Optional Configuration
 
+- **kobo_db**: Path to Kobo's `KoboReader.sqlite` database
+  - Example: `/share/kobo/KoboReader.sqlite` or `/media/kobo/KoboReader.sqlite`
+  - Used to discover matched extensionless kepub files and parse them as EPUBs
+  - Requires `library_path` to be set
+
 - **docsettings_path**: Path to KOReader's docsettings folder for users who store metadata separately
   - Example: `/share/koreader/docsettings`
   - Requires `library_path` to be set
@@ -145,6 +150,7 @@ Click the Home Assistant My button below to open the add-on on your Home Assista
 library_path:
   - /share/books
 database_path: /share/koreader/statistics.sqlite3
+kobo_db: /share/kobo/KoboReader.sqlite
 docsettings_path: /share/koreader/docsettings
 include_unread: true
 title: "My Reading Library"
@@ -242,6 +248,7 @@ For enhanced security, SSL support, and custom domain access, it's highly recomm
 ## Supported Formats
 
 - **EPUB** (v2 and v3)
+- **Kobo extensionless kepub files** (with `kobo_db` configured)
 - **FB2 / FB2.zip**
 - **MOBI** (unencrypted)
 - **CBZ**

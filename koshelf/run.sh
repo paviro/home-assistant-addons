@@ -7,6 +7,7 @@ echo "Starting koshelf addon..."
 INCLUDE_UNREAD=$(bashio::config 'include_unread')
 INCLUDE_ALL_STATS=$(bashio::config 'include_all_stats')
 DATABASE_PATH=$(bashio::config 'database_path')
+KOBO_DB=$(bashio::config 'kobo_db')
 DOCSETTINGS_PATH=$(bashio::config 'docsettings_path')
 HASHDOCSETTINGS_PATH=$(bashio::config 'hashdocsettings_path')
 HEATMAP_SCALE_MAX=$(bashio::config 'heatmap_scale_max')
@@ -54,6 +55,7 @@ echo "Library paths: ${LIBRARY_PATHS[*]}"
 echo "Include unread: $INCLUDE_UNREAD"
 echo "Include all stats: $INCLUDE_ALL_STATS"
 echo "Database path: $DATABASE_PATH"
+echo "Kobo database path: $KOBO_DB"
 echo "Docsettings path: $DOCSETTINGS_PATH"
 echo "Hashdocsettings path: $HASHDOCSETTINGS_PATH"
 echo "Heatmap scale max: $HEATMAP_SCALE_MAX"
@@ -88,6 +90,30 @@ if [[ "$LANGUAGE" =~ ^[a-zA-Z]{2}$ ]]; then
     echo "║"
     echo ""
     bashio::log.fatal "Invalid language code '$LANGUAGE' - full locale required (e.g., en_US)"
+    bashio::exit.nok
+fi
+
+# Validate Kobo database configuration
+if [ -n "$KOBO_DB" ] && [ "$KOBO_DB" != "" ] && [ ${#LIBRARY_PATHS[@]} -eq 0 ]; then
+    echo ""
+    echo "║"
+    echo "║                                ⚠️  ERROR  ⚠️"
+    echo "║"
+    echo "║"
+    echo "║  🚨 INVALID KOBO DATABASE CONFIGURATION 🚨"
+    echo "║"
+    echo "║  kobo_db requires at least one library_path entry."
+    echo "║"
+    echo "║  Example configuration:"
+    echo "║    library_path:"
+    echo "║      - /share/books"
+    echo "║    kobo_db: /share/kobo/KoboReader.sqlite"
+    echo "║"
+    echo "║  💡 Remember: Files must be under /media/ or /share/ directories!"
+    echo "║"
+    echo "║"
+    echo ""
+    bashio::log.fatal "Invalid Kobo database configuration - kobo_db requires library_path"
     bashio::exit.nok
 fi
 
@@ -157,6 +183,11 @@ fi
 # Add statistics-db if provided
 if [ -n "$DATABASE_PATH" ] && [ "$DATABASE_PATH" != "" ]; then
     COMMAND+=(--statistics-db "$DATABASE_PATH")
+fi
+
+# Add kobo-db if provided
+if [ -n "$KOBO_DB" ] && [ "$KOBO_DB" != "" ]; then
+    COMMAND+=(--kobo-db "$KOBO_DB")
 fi
 
 # Add optional --include-unread flag (only when library paths are provided)

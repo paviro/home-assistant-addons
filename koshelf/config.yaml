@@ -1,6 +1,6 @@
 name: "KoShelf"
 description: "A beautiful reading dashboard for your KOReader library with an integrated reader, statistics, and more."
-version: "2026.6.0"
+version: "2026.6.1"
 slug: "koshelf"
 init: false
 arch:
@@ -19,6 +19,7 @@ options:
   library_path: []
 
   database_path: ""
+  kobo_db: ""
   docsettings_path: ""
   hashdocsettings_path: ""
   heatmap_scale_max: "auto"
@@ -40,6 +41,7 @@ schema:
     - str
 
   database_path: str?
+  kobo_db: str?
   docsettings_path: str?
   hashdocsettings_path: str?
   include_unread: bool
