@@ -7,7 +7,7 @@ RUN apk add --no-cache \
     unzip
 
 # Set the version
-ARG KOSHELF_VERSION=2026.6.1
+ARG KOSHELF_VERSION=2026.7.0
 
 # Detect architecture and libc, then download appropriate binary
 RUN ARCH=$(uname -m) && \
@@ -23,18 +23,21 @@ RUN ARCH=$(uname -m) && \
     case $ARCH in \
     x86_64) RELEASE_ARCH="linux-${LIBC}-x86_64" ;; \
     aarch64) RELEASE_ARCH="linux-${LIBC}-aarch64" ;; \
-    i386|i686) RELEASE_ARCH="linux-${LIBC}-x86_64" ;; \
-    armv7l|armhf) RELEASE_ARCH="linux-${LIBC}-aarch64" ;; \
-    *) echo "Unsupported architecture: $ARCH, falling back to x86_64" && RELEASE_ARCH="linux-${LIBC}-x86_64" ;; \
+    i386|i686) RELEASE_ARCH="linux-${LIBC}-i686" ;; \
+    armv7l|armhf) RELEASE_ARCH="linux-${LIBC}-armv7" ;; \
+    *) echo "Unsupported architecture: $ARCH" && exit 1 ;; \
     esac && \
     echo "Detected: Architecture=${ARCH}, Libc=${LIBC}" && \
     echo "Downloading koshelf v${KOSHELF_VERSION} for ${RELEASE_ARCH}" && \
     curl -L -o /tmp/koshelf.zip \
     "https://github.com/paviro/KoShelf/releases/download/${KOSHELF_VERSION}/${RELEASE_ARCH}.zip" && \
+    curl -L -o /tmp/SHA256SUMS \
+    "https://github.com/paviro/KoShelf/releases/download/${KOSHELF_VERSION}/SHA256SUMS" && \
+    grep " ${RELEASE_ARCH}.zip$" /tmp/SHA256SUMS | sed "s| ${RELEASE_ARCH}.zip| /tmp/koshelf.zip|" | sha256sum -c - && \
     unzip /tmp/koshelf.zip -d /tmp/ && \
     mv /tmp/koshelf /usr/local/bin/koshelf && \
     chmod +x /usr/local/bin/koshelf && \
-    rm -rf /tmp/koshelf.zip
+    rm -rf /tmp/koshelf.zip /tmp/SHA256SUMS
 
 # Copy the run script
 COPY run.sh /
