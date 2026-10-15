@@ -158,6 +158,8 @@ http {{
     server_tokens off;
     client_body_temp_path /run/koshelf/client;
     proxy_temp_path /run/koshelf/proxy;
+    # The default follows the CPU cache line (32 on armv7), too small for user-ID keys.
+    map_hash_bucket_size 128;
     map $http_x_remote_user_id $allowed_user {{
         default 0;
 {allowed}

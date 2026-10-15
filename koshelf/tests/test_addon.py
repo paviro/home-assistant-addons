@@ -56,6 +56,7 @@ class ConfigurationTests(unittest.TestCase):
         conf = nginx(self.cfg(allowed_ha_user_ids=[uid]))
         self.assertIn(f'"{uid}" 1;', conf)
         self.assertNotIn('"~^[a-f0-9]{32}$"', conf)
+        self.assertIn('map_hash_bucket_size 128;', conf)
 
     def test_proxy_add_on_on_internal_network_stays_trusted(self):
         # Nginx Proxy Manager and similar add-ons reach KoShelf from the hassio network.
