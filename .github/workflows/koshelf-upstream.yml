@@ -48,4 +48,4 @@ jobs:
             every advertised architecture before creating this PR.
 
             Review upstream changes and complete the Home Assistant checks in
-            koshelf/TESTING.md before merging. No automatic merge or deployment.
+            koshelf/UPSTREAM.md before merging. No automatic merge or deployment.

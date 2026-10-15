@@ -1,17 +1,17 @@
 # Upstream and release gate
 
 KoShelf source: https://github.com/paviro/KoShelf (EUPL-1.2).
-`upstream.json` records reviewed release artifacts and their SHA-256 checksums.
-The current checksums were read from release `2026.10.0` on 2026-10-15.
+`upstream.json` records the pinned upstream version, release artifacts, and their
+SHA-256 checksums. `config.yaml` records the add-on version. Consult these files
+for the release being built.
 
-The published release includes `--bind-address`, `--auth-proxy-peers`,
+Compatible upstream releases must support `--bind-address`, `--auth-proxy-peers`,
 request-scoped proxy authentication, CSRF headers, and dynamic subpath support.
-`integration_ready` now enables builds against these pinned artifacts. This flag
-records upstream compatibility, not completion of container or HA validation.
+`integration_ready` permits builds against the pinned artifacts; it is not evidence
+that container or Home Assistant validation has passed for a release.
 Complete the following release checks before publishing the add-on update.
 
-1. Confirm the reviewed upstream tag and release notes. The current tag is
-   `2026.10.0`, source commit `855c200a1d5e65b86cb5dcec6e395e85ec3921a9`.
+1. Confirm the upstream tag in `upstream.json`, its source commit, and release notes.
 2. For future updates, run `python3 scripts/update-upstream.py --write` to pin the
    stable release and all four Linux musl archive checksums. Review the source diff.
 3. Run `sh scripts/check-release.sh` with Docker and QEMU available. Each advertised
@@ -19,17 +19,17 @@ Complete the following release checks before publishing the add-on update.
 4. On Home Assistant, verify Ingress with admin and non-admin users, the allowlist,
    direct HTTPS and LAN HTTP, reader/downloads, SSE, edits, upgrade, restart, and
    backup/restore. Test the companion app as well.
-5. Record results in TESTING.md, then publish the add-on update through the existing
-   repository.
+5. Record results in the update PR with the tested versions and environment, then
+   publish the add-on update through the existing repository.
 
 No upstream executable is patched. Installation verifies the pinned checksum,
 extracts only the expected binary, and checks required CLI support. Incompatible
 releases fail closed. The runtime performs an additional compatibility check.
 
-The image uses Alpine 3.23 with Python, nginx, certificates and timezone data.
-The wrapper uses Home Assistant's Docker init instead of requiring the former
-bashio/s6 image. This preserves all four architectures without relying on current
-Home Assistant base-image builds, which now advertise only amd64 and aarch64.
+The image uses the Alpine base images specified in `build.yaml`, with Python,
+nginx, certificates, and timezone data installed by `Dockerfile`. The wrapper
+uses Home Assistant's Docker init. Advertised architectures are listed in
+`config.yaml` and must match the build images and upstream artifacts.
 Alpine packages are resolved at build time; this is not a byte-for-byte reproducible
 image. Both base-image and package security updates need maintainer review.
 
@@ -47,6 +47,5 @@ workflows, the update workflow runs the complete build/smoke checks itself befor
 creating the PR. Human PR changes also run the regular CI workflow.
 
 New upstream releases use the exact KoShelf version for the add-on. Reserve a
-fourth numeric component for add-on-only revisions when needed. The existing
-`2026.10.0.2` includes these add-on-only changes; the next newer upstream
-release returns to the three-component version.
+fourth numeric component for add-on-only revisions when needed. The next newer
+upstream release returns to its exact three-component version.

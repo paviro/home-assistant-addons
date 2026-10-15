@@ -1,8 +1,5 @@
 # KoShelf setup
 
-This version uses KoShelf 2026.10.0. See `TESTING.md` for validation
-results and the remaining container and Home Assistant release checks.
-
 ## Sidebar
 
 1. Put books and KOReader metadata under `/share` or `/media`.
@@ -91,8 +88,8 @@ Update the existing `koshelf` add-on in the existing repository; do not uninstal
 The slug and `/data` layout stay unchanged. Existing library settings, password
 hashes, and session data are retained.
 
-On the first startup after updating, the add-on automatically replaces the old
-access settings with the **Direct access** switch:
+When upgrading from the old access settings, the add-on migrates them once to
+the **Direct access** switch:
 
 - Old `auto` (or no mode) with `enable_auth: true`: turn direct access and
   **Allow plain HTTP** on, preserving the existing authenticated connection.
