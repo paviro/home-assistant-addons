@@ -56,6 +56,22 @@ allowed_ha_user_ids: []
    `X-Forwarded-For`. Serve KoShelf at `/` on its own hostname.
 5. Restart and open the direct HTTPS address. Sign in with KoShelf's password.
 
+**Nginx Proxy Manager add-on:** it runs on Home Assistant's internal network, so
+trust that network and point the proxy host at the add-on:
+
+```yaml
+direct_access: enabled
+direct_url: https://books.example.com
+trusted_proxies:
+  - 172.30.32.0/23
+```
+
+In Nginx Proxy Manager, forward `http` to your Home Assistant IP (or the add-on
+hostname shown on its Info page) on port `38492`, enable Websockets support and
+SSL. Its default headers already set Host, `X-Forwarded-For` and
+`X-Forwarded-Proto`. Trusting this network lets other add-ons assert a client
+address or scheme too; that never grants a login.
+
 Requests that do not arrive through a configured proxy with HTTPS indicated,
 using the configured Host, are rejected when LAN HTTP is disabled. The add-on
 itself does not terminate TLS or provision certificates.
@@ -78,9 +94,8 @@ hashes, and session data are retained.
 The initial `direct_access: auto` compatibility setting behaves as follows:
 
 - Existing `enable_auth: true`: preserve direct access and legacy LAN HTTP on
-  the unchanged `38492` host port. The former default `trusted_proxies` entry
-  `172.30.32.0/23` (the whole Home Assistant internal network) is ignored in
-  `auto` mode; list a specific TLS proxy address instead.
+  the unchanged `38492` host port. A saved `trusted_proxies` entry such as the
+  former default `172.30.32.0/23` keeps working for a proxy add-on.
 - Existing `enable_auth: false`: close direct access; use the authenticated sidebar.
 - Explicit `direct_access: disabled`: always close direct access, even though the
   host port stays mapped.

@@ -1,5 +1,3 @@
-import contextlib
-import io
 from pathlib import Path
 import sys
 import unittest
@@ -59,13 +57,14 @@ class ConfigurationTests(unittest.TestCase):
         self.assertIn(f'"{uid}" 1;', conf)
         self.assertNotIn('"~^[a-f0-9]{32}$"', conf)
 
-    def test_former_default_proxy_is_not_trusted_after_migration(self):
-        with contextlib.redirect_stdout(io.StringIO()):
-            cfg = self.cfg(enable_auth=True, trusted_proxies=['172.30.32.0/23', '192.168.1.5'])
-        self.assertEqual(cfg['trusted_proxies'], ['192.168.1.5/32'])
-        self.assertNotIn('172.30.32.0/23', nginx(cfg))
-        explicit = self.cfg(direct_access='enabled', allow_insecure_http=True, trusted_proxies=['172.30.32.0/23'])
-        self.assertEqual(explicit['trusted_proxies'], ['172.30.32.0/23'])
+    def test_proxy_add_on_on_internal_network_stays_trusted(self):
+        # Nginx Proxy Manager and similar add-ons reach KoShelf from the hassio network.
+        legacy = nginx(self.cfg(enable_auth=True, trusted_proxies=['172.30.32.0/23']))
+        self.assertIn('set_real_ip_from 172.30.32.0/23;', legacy)
+        https = nginx(self.cfg(direct_access='enabled', direct_url='https://books.example',
+                               trusted_proxies=['172.30.32.0/23']))
+        self.assertIn('set_real_ip_from 172.30.32.0/23;', https)
+        self.assertIn('if ($http_host != "books.example")', https)
         for everything in ('0.0.0.0/0', '::/0'):
             with self.subTest(everything=everything), self.assertRaises(ValueError):
                 self.cfg(trusted_proxies=[everything])

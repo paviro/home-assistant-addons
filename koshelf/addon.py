@@ -16,7 +16,6 @@ RUNTIME = Path('/run/koshelf')
 OPTIONS = Path('/data/options.json')
 BINARY = '/usr/local/bin/koshelf'
 RESET_MARKER = Path('/data/.password-reset-pending')
-LEGACY_PROXIES = '172.30.32.0/23'
 
 
 def options(raw):
@@ -33,15 +32,9 @@ def options(raw):
         for v in cfg['allowed_ha_user_ids']
     ):
         raise ValueError('allowed_ha_user_ids must contain Home Assistant user IDs (32 lowercase hex characters)')
-    proxies = [str(ipaddress.ip_network(v, strict=False)) for v in cfg.get('trusted_proxies', [])]
-    if any(net.endswith('/0') for net in proxies):
+    cfg['trusted_proxies'] = [str(ipaddress.ip_network(v, strict=False)) for v in cfg.get('trusted_proxies', [])]
+    if any(net.endswith('/0') for net in cfg['trusted_proxies']):
         raise ValueError('trusted_proxies must list specific proxy addresses, not every address')
-    # The former default trusted the whole hassio network (Supervisor and every
-    # add-on). A carried-over value must not let those peers assert client details.
-    if mode == 'auto' and LEGACY_PROXIES in proxies:
-        proxies.remove(LEGACY_PROXIES)
-        print(f'KoShelf: ignoring former default trusted proxy {LEGACY_PROXIES}', flush=True)
-    cfg['trusted_proxies'] = proxies
     origin = cfg.get('direct_url', '').rstrip('/')
     url = urlsplit(origin)
     if origin and (url.scheme != 'https' or not url.hostname or url.path or url.query or url.fragment
