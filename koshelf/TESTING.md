@@ -28,7 +28,7 @@ Verified locally on macOS on 2026-10-15:
 The cookie fix was amended into upstream integration commit `ce2d7e6`.
 Later user commits tagged KoShelf 2026.10.0. Its release workflow succeeded,
 including all four required Linux builds, and the published artifacts are pinned
-in `upstream.json`. The add-on version is 2026.10.0.1.
+in `upstream.json`. That add-on revision was 2026.10.0.1.
 
 ## Repeat local tests
 
@@ -44,6 +44,12 @@ The smoke test creates disposable data and random localhost ports. It first
 tests the production Supervisor address restriction, then substitutes loopback
 in a temporary nginx configuration to simulate authenticated Ingress requests.
 It does not connect to a real Home Assistant instance or modify an existing library.
+
+## Home Assistant verification
+
+On 2026-10-15, the maintainer reported that Home Assistant Ingress works after
+testing it on their installation. This confirms Ingress; the report does not
+specify results for the other host checks below.
 
 ## Remaining release gates
 
@@ -67,3 +73,14 @@ Before publishing the add-on update:
 6. Verify cold backup/restore, plus separate restoration of `/share` and `/media`.
 
 Do not treat an unexecuted container or HA check as a passing result.
+
+## Access settings simplification (2026.10.0.2)
+
+- All 24 Python tests pass, including legacy access migration, explicit on/off
+  choices, retry after failed Supervisor saves, and preservation of secret references.
+- Metadata, translations, schema coverage, and version ordering pass validation.
+- Migration uses Supervisor's stored self-info options because its options.json
+  writer strips keys removed from the schema before the add-on starts.
+- Container execution and migration on a real Home Assistant host have not been
+  tested for this revision. The earlier maintainer Ingress confirmation does not
+  cover these new migration changes.

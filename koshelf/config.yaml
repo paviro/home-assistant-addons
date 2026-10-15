@@ -1,9 +1,9 @@
 name: "KoShelf"
 description: "A beautiful reading dashboard for your KOReader library with an integrated reader, statistics, and more."
-version: "2026.10.0.1"
+version: "2026.10.0.2"
 slug: "koshelf"
 init: true
-stage: experimental
+stage: stable
 backup: cold
 ingress: true
 ingress_port: 8099
@@ -24,9 +24,8 @@ map:
 ports:
   38492/tcp: 38492
 ports_description:
-  38492/tcp: Optional password-protected direct access; also configure direct_access
+  38492/tcp: Optional password-protected direct access; enable Direct access
 options:
-  direct_access: auto
   allow_insecure_http: false
   direct_url: ""
   allowed_ha_user_ids: []
@@ -49,7 +48,6 @@ options:
   min_pages_per_day: ""
   min_time_per_day: "30s"
   language: "en_US"
-  enable_auth: false
   reset_password: false
   trusted_proxies: []
   enable_writeback: false
@@ -57,7 +55,8 @@ options:
   ignore_stable_page_metadata: false
   debug_log: false
 schema:
-  direct_access: list(auto|enabled|disabled)
+  # No default until first startup: preserve legacy settings during migration.
+  direct_access_enabled: bool?
   allow_insecure_http: bool
   direct_url: str?
   allowed_ha_user_ids:
@@ -83,7 +82,6 @@ schema:
   min_pages_per_day: str?
   min_time_per_day: str?
   language: str?
-  enable_auth: bool
   reset_password: bool
   trusted_proxies:
     - str

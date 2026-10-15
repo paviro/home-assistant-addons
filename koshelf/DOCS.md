@@ -1,6 +1,6 @@
 # KoShelf setup
 
-This experimental version uses KoShelf 2026.10.0. See `TESTING.md` for validation
+This version uses KoShelf 2026.10.0. See `TESTING.md` for validation
 results and the remaining container and Home Assistant release checks.
 
 ## Sidebar
@@ -26,12 +26,11 @@ The sidebar may still be visible to users excluded by this allowlist.
 
 | Setting | Default | Behavior |
 | --- | --- | --- |
-| `direct_access` | `auto` | `enabled` starts direct access; `disabled` closes it. `auto` preserves legacy direct access only if `enable_auth` was true. |
-| `allow_insecure_http` | `false` | With explicit `enabled` direct access, allow plain HTTP on a trusted LAN. Passwords and session cookies are unencrypted. |
+| `direct_access_enabled` | `false` | Turn password-protected direct access on or off. Home Assistant sidebar access remains available. |
+| `allow_insecure_http` | `false` | With direct access enabled, allow plain HTTP on a trusted LAN. Passwords and session cookies are unencrypted. |
 | `direct_url` | empty | HTTPS origin of the direct reverse proxy, for example `https://books.example.com`; no paths. Required when HTTP is disabled. |
 | `trusted_proxies` | `[]` | Exact addresses/CIDRs of direct-access TLS proxies. These proxies may assert client address and HTTPS scheme; this never grants login. |
 | `allowed_ha_user_ids` | `[]` | Optional allowlist for sidebar access. |
-| `enable_auth` | `false` | Legacy migration input for `direct_access: auto`. All enabled direct access now requires authentication regardless of this value. |
 | `reset_password` | `false` | Generate a replacement password and revoke sessions. The flag is cleared only after Supervisor confirms persistence. |
 
 For an explicit sidebar-only setup:
@@ -39,18 +38,19 @@ For an explicit sidebar-only setup:
 ```yaml
 library_path:
   - /share/books
-direct_access: disabled
+direct_access_enabled: false
 allowed_ha_user_ids: []
 ```
 
 ### Optional direct HTTPS access
 
-1. Set `direct_access: enabled`, `allow_insecure_http: false`, and `direct_url` to
+1. Set `direct_access_enabled: true`, `allow_insecure_http: false`, and `direct_url` to
    the external HTTPS origin.
 2. Put only the TLS proxy's addresses in `trusted_proxies`. Do not trust client
    networks or all addresses. The proxy must overwrite forwarding headers.
-3. Keep the `38492/tcp` mapping in Home Assistant's Network settings (mapped by
-   default; nothing listens on it unless direct access is enabled).
+3. In Nginx Proxy Manager, use forwarding scheme **http** and port **38492**;
+   public HTTPS terminates at the proxy. Keep the `38492/tcp` mapping in Home
+   Assistant's Network settings (mapped by default; nothing listens on it unless direct access is enabled).
 4. Configure the TLS proxy to forward to that port, preserve the external Host,
    and set `X-Forwarded-Proto: https` and the actual client address in
    `X-Forwarded-For`. Serve KoShelf at `/` on its own hostname.
@@ -60,7 +60,7 @@ allowed_ha_user_ids: []
 trust that network and point the proxy host at the add-on:
 
 ```yaml
-direct_access: enabled
+direct_access_enabled: true
 direct_url: https://books.example.com
 trusted_proxies:
   - 172.30.32.0/23
@@ -76,7 +76,7 @@ Requests that do not arrive through a configured proxy with HTTPS indicated,
 using the configured Host, are rejected when LAN HTTP is disabled. The add-on
 itself does not terminate TLS or provision certificates.
 
-For trusted LAN HTTP, explicitly set `direct_access: enabled` and
+For trusted LAN HTTP, explicitly set `direct_access_enabled: true` and
 `allow_insecure_http: true`, keep the network mapping, and open
 `http://HOME_ASSISTANT_IP:38492`. Use HTTPS for access over untrusted networks.
 
@@ -91,20 +91,22 @@ Update the existing `koshelf` add-on in the existing repository; do not uninstal
 The slug and `/data` layout stay unchanged. Existing library settings, password
 hashes, and session data are retained.
 
-The initial `direct_access: auto` compatibility setting behaves as follows:
+On the first startup after updating, the add-on automatically replaces the old
+access settings with the **Direct access** switch:
 
-- Existing `enable_auth: true`: preserve direct access and legacy LAN HTTP on
-  the unchanged `38492` host port. A saved `trusted_proxies` entry such as the
-  former default `172.30.32.0/23` keeps working for a proxy add-on.
-- Existing `enable_auth: false`: close direct access; use the authenticated sidebar.
-- Explicit `direct_access: disabled`: always close direct access, even though the
-  host port stays mapped.
+- Old `auto` (or no mode) with `enable_auth: true`: turn direct access and
+  **Allow plain HTTP** on, preserving the existing authenticated connection.
+- Old `auto` with authentication off: leave direct access off.
+- Old `enabled` or `disabled`: preserve that choice and the HTTP setting.
 
-After migration, select `enabled` or `disabled` explicitly. In `auto` mode the
-legacy authenticated configuration permits HTTP even if `allow_insecure_http`
-is false. To require HTTPS, select `enabled` and configure HTTPS as above.
-New installations map the host port but start no direct listener by default, so
-connections to it are refused until direct access is enabled.
+The migration saves the new settings through Supervisor and removes the retired
+`direct_access` and `enable_auth` options. Passwords, sessions, trusted proxies,
+and the `38492` host-port mapping are retained. If saving fails, startup stops
+and retries on the next start without changing credentials.
+
+New installations default to sidebar-only access. After the first startup,
+**Direct access** appears as an on/off switch in configuration; before then it
+is available under optional settings. No direct listener starts until enabled.
 
 ## Library and display settings
 
@@ -164,7 +166,7 @@ mounts. Restore both sources and add-on data when recovering the whole library.
 
 - **403 in sidebar:** check that Supervisor supplies a user ID, the ID is allowed,
   and the Ingress URL is used. Direct requests to port 8099 are deliberately denied.
-- **Direct port unavailable:** enable `direct_access` and check that the host
+- **Direct port unavailable:** enable `direct_access_enabled` and check that the host
   mapping was not removed in Network settings.
 - **Login cookie does not stick:** verify HTTP/HTTPS mode, trusted TLS proxy addresses,
   external Host and scheme headers. Use the configured HTTPS origin.

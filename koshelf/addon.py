@@ -18,14 +18,51 @@ BINARY = '/usr/local/bin/koshelf'
 RESET_MARKER = Path('/data/.password-reset-pending')
 
 
+def supervisor_options(method, payload=None):
+    endpoint = 'info' if method == 'GET' else 'options'
+    request = Request(f'http://supervisor/addons/self/{endpoint}',
+                      data=None if payload is None else json.dumps({'options': payload}).encode(),
+                      method=method,
+                      headers={'Authorization': 'Bearer ' + os.environ['SUPERVISOR_TOKEN'],
+                               'Content-Type': 'application/json'})
+    with urlopen(request, timeout=15) as response:
+        result = json.load(response)
+    if result.get('result') != 'ok':
+        raise RuntimeError('Supervisor did not confirm configuration access')
+    return result
+
+
+def migrate_options(raw):
+    if 'direct_access_enabled' in raw:
+        return raw
+    # Supervisor strips retired schema keys from options.json. Read its stored
+    # options to recover them, and preserve secret references when saving.
+    stored = supervisor_options('GET')['data']['options']
+    updated = dict(stored)
+    mode = updated.pop('direct_access', 'auto')
+    auth = updated.pop('enable_auth', False)
+    if mode not in ('auto', 'enabled', 'disabled'):
+        raise ValueError('Unknown legacy direct access mode')
+    legacy = mode == 'auto' and auth is True
+    updated.setdefault('direct_access_enabled', mode == 'enabled' or legacy)
+    if legacy and updated['direct_access_enabled']:
+        updated['allow_insecure_http'] = True
+    supervisor_options('POST', updated)
+    # Use resolved options.json values for this run, not stored !secret refs.
+    migrated = {k: v for k, v in raw.items() if k not in ('direct_access', 'enable_auth')}
+    migrated['direct_access_enabled'] = updated['direct_access_enabled']
+    migrated['allow_insecure_http'] = updated.get('allow_insecure_http', False)
+    print('Migrated direct access settings to the on/off switch.', flush=True)
+    return migrated
+
+
 def options(raw):
     cfg = dict(raw)
-    mode = cfg.get('direct_access', 'auto')
-    if mode not in ('auto', 'enabled', 'disabled'):
-        raise ValueError('direct_access must be auto, enabled or disabled')
-    legacy = mode == 'auto' and cfg.get('enable_auth') is True
-    cfg['direct_enabled'] = mode == 'enabled' or legacy
-    cfg['http_enabled'] = cfg.get('allow_insecure_http', False) is True or legacy
+    enabled = cfg.get('direct_access_enabled', False)
+    if not isinstance(enabled, bool):
+        raise ValueError('direct_access_enabled must be true or false')
+    cfg['direct_enabled'] = enabled
+    cfg['http_enabled'] = cfg.get('allow_insecure_http', False) is True
     cfg['allowed_ha_user_ids'] = cfg.get('allowed_ha_user_ids', [])
     if not isinstance(cfg['allowed_ha_user_ids'], list) or any(
         not isinstance(v, str) or not re.fullmatch(r'[a-f0-9]{32}', v)
@@ -238,7 +275,7 @@ def healthcheck():
 def main():
     if '--healthcheck' in sys.argv:
         return healthcheck()
-    cfg = options(json.loads(OPTIONS.read_text()))
+    cfg = options(migrate_options(json.loads(OPTIONS.read_text())))
     # nginx drops worker privileges; workers need to traverse to their body buffers.
     RUNTIME.mkdir(mode=0o755, parents=True, exist_ok=True)
     RUNTIME.chmod(0o755)

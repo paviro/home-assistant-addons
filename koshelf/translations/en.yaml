@@ -1,12 +1,12 @@
 configuration:
-  direct_access:
+  direct_access_enabled:
     name: Direct access
-    description: Auto preserves old authenticated access. Enabled requires KoShelf login;
-      disabled closes the direct listener.
+    description: Enable password-protected access outside Home Assistant. When off, use
+      the Home Assistant sidebar.
   allow_insecure_http:
-    name: Allow LAN HTTP
-    description: Explicitly allow unencrypted direct login on a trusted LAN. Legacy auto mode
-      preserves HTTP independently.
+    name: Allow plain HTTP
+    description: Allow unencrypted direct login on a trusted LAN. Leave off when using
+      a configured HTTPS reverse proxy.
   direct_url:
     name: Direct HTTPS origin
     description: External HTTPS origin without a path, for example https://books.example.com.
@@ -14,10 +14,6 @@ configuration:
     name: Allowed Home Assistant users
     description: Exact HA user IDs; an empty list permits every authenticated HA user. Everyone
       shares the same library.
-  enable_auth:
-    name: Legacy authentication setting
-    description: 'Used only by direct_access: auto during migration. Direct access always
-      requires authentication.'
   reset_password:
     name: Reset direct-login password
     description: Generate a new password and revoke sessions. Automatically cleared after
@@ -50,9 +46,10 @@ configuration:
     description: Days to keep saved metadata and covers after an archived entry is removed.
       Use 0 for immediate deletion or forever to keep them indefinitely.
   enable_library_management:
-    name: Allow archive removal
-    description: Allow all authorized users to remove archived entries. Requires archive
-      preservation; original ebooks and KOReader sidecars are never deleted.
+    name: Library management
+    description: Allow all authorized users to manage the library. Currently permits removal
+      of archived entries when archive preservation is enabled; original ebooks and
+      KOReader sidecars are not deleted.
   kobo_db:
     name: Kobo database
     description: Optional KoboReader.sqlite for extensionless kepub discovery; requires library

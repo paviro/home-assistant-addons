@@ -33,7 +33,7 @@ class SupervisionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory, contextlib.ExitStack() as stack:
             root = Path(directory)
             config = root / 'options.json'
-            config.write_text(json.dumps({'library_path': ['/share/books']}))
+            config.write_text(json.dumps({'library_path': ['/share/books'], 'direct_access_enabled': False}))
             for key, value in {'OPTIONS': config, 'RUNTIME': root / 'run', 'RESET_MARKER': root / 'reset'}.items():
                 stack.enter_context(patch.object(addon, key, value))
             stack.enter_context(patch.object(addon.sys, 'argv', ['addon.py']))

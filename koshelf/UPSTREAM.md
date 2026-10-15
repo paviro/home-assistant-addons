@@ -20,7 +20,7 @@ Complete the following release checks before publishing the add-on update.
    direct HTTPS and LAN HTTP, reader/downloads, SSE, edits, upgrade, restart, and
    backup/restore. Test the companion app as well.
 5. Record results in TESTING.md, then publish the add-on update through the existing
-   repository. Keep it experimental until host verification passes.
+   repository.
 
 No upstream executable is patched. Installation verifies the pinned checksum,
 extracts only the expected binary, and checks required CLI support. Incompatible
@@ -37,7 +37,7 @@ image. Both base-image and package security updates need maintainer review.
 
 The repository workflow runs daily and on demand. It discovers a newer stable
 KoShelf release, validates all architecture assets/checksums, updates the pinned
-manifest and add-on revision, and runs unit tests plus all container smoke tests
+manifest and add-on version, and runs unit tests plus all container smoke tests
 before opening a PR. It never auto-merges or publishes a release.
 
 Enable GitHub Actions and allow GitHub Actions to create pull requests in the
@@ -45,3 +45,8 @@ repository settings. The workflow uses the repository GITHUB_TOKEN; no PAT is
 required. Because PRs created with that token do not normally trigger further
 workflows, the update workflow runs the complete build/smoke checks itself before
 creating the PR. Human PR changes also run the regular CI workflow.
+
+New upstream releases use the exact KoShelf version for the add-on. Reserve a
+fourth numeric component for add-on-only revisions when needed. The existing
+`2026.10.0.2` includes these add-on-only changes; the next newer upstream
+release returns to the three-component version.

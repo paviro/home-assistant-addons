@@ -116,7 +116,7 @@ def main():
             assert request(backend, '/api/auth/logout', {**h, 'Cookie': cookie}, '{}', 'POST')[0] in (200, 204)
             assert request(backend, '/api/items', {'Cookie': cookie})[0] == 401
 
-            cfg = options({'library_path': [str(library)], 'direct_access': 'enabled', 'allow_insecure_http': True})
+            cfg = options({'library_path': [str(library)], 'direct_access_enabled': True, 'allow_insecure_http': True})
             conf = nginx(cfg).replace('/run/koshelf', folder).replace('127.0.0.1:3000', f'127.0.0.1:{backend}')
             conf = conf.replace('listen 8099;', f'listen 127.0.0.1:{ingress};').replace('listen 38492;', f'listen 127.0.0.1:{direct};')
             conf_path = root / 'nginx.conf'
@@ -167,7 +167,7 @@ def main():
             assert request(ingress, '/api/items', {**forged, 'X-Remote-User-Id': 'b' * 32})[0] == 200
             proxy.terminate()
             proxy.wait(timeout=10)
-            tls_cfg = options({'library_path': [str(library)], 'direct_access': 'enabled',
+            tls_cfg = options({'library_path': [str(library)], 'direct_access_enabled': True,
                                'direct_url': 'https://books.example', 'trusted_proxies': ['192.0.2.1']})
 
             def tls_config():

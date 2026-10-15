@@ -10,19 +10,16 @@ class ConfigurationTests(unittest.TestCase):
     def cfg(self, **values):
         return options({'library_path': ['/share/My Books'], **values})
 
-    def test_migration_preserves_only_authenticated_direct_access(self):
+    def test_direct_access_defaults_off(self):
         self.assertFalse(self.cfg()['direct_enabled'])
-        self.assertFalse(self.cfg(enable_auth=False)['direct_enabled'])
-        cfg = self.cfg(enable_auth=True)
-        self.assertTrue(cfg['direct_enabled'])
-        self.assertTrue(cfg['http_enabled'])
-        self.assertFalse(self.cfg(enable_auth=True, direct_access='disabled')['direct_enabled'])
+        with self.assertRaises(ValueError):
+            self.cfg(direct_access_enabled='auto')
 
     def test_explicit_direct_access_requires_transport_configuration(self):
         with self.assertRaises(ValueError):
-            self.cfg(direct_access='enabled')
-        self.assertTrue(self.cfg(direct_access='enabled', allow_insecure_http=True)['direct_enabled'])
-        cfg = self.cfg(direct_access='enabled', direct_url='https://books.example', trusted_proxies=['192.168.1.5'])
+            self.cfg(direct_access_enabled=True)
+        self.assertTrue(self.cfg(direct_access_enabled=True, allow_insecure_http=True)['direct_enabled'])
+        cfg = self.cfg(direct_access_enabled=True, direct_url='https://books.example', trusted_proxies=['192.168.1.5'])
         self.assertFalse(cfg['http_enabled'])
         self.assertIn('if ($direct_proto != https)', nginx(cfg))
 
@@ -42,7 +39,7 @@ class ConfigurationTests(unittest.TestCase):
         self.assertNotIn('172.30.32.0/23', args)
 
     def test_proxy_identity_is_exclusive_to_supervisor_entrypoint(self):
-        conf = nginx(self.cfg(direct_access='enabled', allow_insecure_http=True))
+        conf = nginx(self.cfg(direct_access_enabled=True, allow_insecure_http=True))
         ingress, direct = conf.split('listen 38492;')
         self.assertIn('if ($remote_addr != 172.30.32.2)', ingress)
         self.assertIn('if ($allowed_user = 0)', ingress)
@@ -60,9 +57,9 @@ class ConfigurationTests(unittest.TestCase):
 
     def test_proxy_add_on_on_internal_network_stays_trusted(self):
         # Nginx Proxy Manager and similar add-ons reach KoShelf from the hassio network.
-        legacy = nginx(self.cfg(enable_auth=True, trusted_proxies=['172.30.32.0/23']))
+        legacy = nginx(self.cfg(direct_access_enabled=True, allow_insecure_http=True, trusted_proxies=['172.30.32.0/23']))
         self.assertIn('set_real_ip_from 172.30.32.0/23;', legacy)
-        https = nginx(self.cfg(direct_access='enabled', direct_url='https://books.example',
+        https = nginx(self.cfg(direct_access_enabled=True, direct_url='https://books.example',
                                trusted_proxies=['172.30.32.0/23']))
         self.assertIn('set_real_ip_from 172.30.32.0/23;', https)
         self.assertIn('if ($http_host != "books.example")', https)
@@ -71,7 +68,7 @@ class ConfigurationTests(unittest.TestCase):
                 self.cfg(trusted_proxies=[everything])
 
     def test_direct_host_is_compared_in_lowercase(self):
-        cfg = self.cfg(direct_access='enabled', direct_url='https://Books.Example:8443', trusted_proxies=['192.168.1.5'])
+        cfg = self.cfg(direct_access_enabled=True, direct_url='https://Books.Example:8443', trusted_proxies=['192.168.1.5'])
         self.assertIn('if ($http_host != "books.example:8443")', nginx(cfg))
 
     def test_statistics_only_and_legacy_sources_are_merged_without_duplicates(self):

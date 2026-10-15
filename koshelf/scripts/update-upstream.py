@@ -58,12 +58,12 @@ def main():
     if proposed and args.write:
         manifest.write_text(json.dumps(proposed, indent=2) + '\n')
         config = ROOT / 'config.yaml'
-        text, count = re.subn(r'^version: "[^"\n]+"$', f'version: "{version}.1"', config.read_text(), flags=re.M)
+        text, count = re.subn(r'^version: "[^"\n]+"$', f'version: "{version}"', config.read_text(), flags=re.M)
         if count != 1:
             raise ValueError('Expected exactly one add-on version')
         config.write_text(text)
         changelog = ROOT / 'CHANGELOG.md'
-        changelog.write_text(f'# {version}.1\n\n- Update KoShelf to {version}. Review upstream release notes and Home Assistant smoke results before merging.\n\n' + changelog.read_text())
+        changelog.write_text(f'# {version}\n\n- Update KoShelf to {version}. Review upstream release notes and Home Assistant smoke results before merging.\n\n' + changelog.read_text())
     if output := os.environ.get('GITHUB_OUTPUT'):
         with open(output, 'a') as stream:
             stream.write(f'changed={str(proposed is not None).lower()}\nversion={version}\n')

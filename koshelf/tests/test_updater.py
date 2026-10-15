@@ -2,6 +2,8 @@ import importlib.util
 import json
 from pathlib import Path
 import unittest
+import tempfile
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 spec = importlib.util.spec_from_file_location('updater', ROOT / 'scripts/update-upstream.py')
@@ -32,3 +34,16 @@ class UpdaterTests(unittest.TestCase):
 
     def test_same_release_is_not_republished(self):
         self.assertIsNone(updater.candidate(self.current, {**self.release, 'tag_name': self.current['version']}, self.sums))
+
+    def test_write_keeps_addon_version_in_sync_with_upstream(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            for name in ['upstream.json', 'config.yaml', 'CHANGELOG.md']:
+                (root / name).write_text((ROOT / name).read_text())
+            with patch.object(updater, 'ROOT', root), patch.object(
+                updater, 'fetch', side_effect=[json.dumps(self.release).encode(), self.sums.encode()]
+            ), patch('sys.argv', ['update-upstream.py', '--write']), patch.dict(updater.os.environ, {}, clear=True):
+                updater.main()
+            self.assertIn('version: "2099.1.0"\n', (root / 'config.yaml').read_text())
+            self.assertTrue((root / 'CHANGELOG.md').read_text().startswith('# 2099.1.0\n'))
+            self.assertEqual(json.loads((root / 'upstream.json').read_text())['version'], '2099.1.0')
