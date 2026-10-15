@@ -1,5 +1,5 @@
 {
-  "version": "2026.10.0",
+  "version": "2026.10.1",
   "integration_ready": true,
   "required_flags": [
     "--bind-address",
@@ -8,19 +8,19 @@
   "assets": {
     "amd64": {
       "name": "linux-musl-x86_64.zip",
-      "sha256": "4fb09abd46180ab8f52039ab1e42f3527947811e489d711dd4ae02bbe3f6e6ff"
+      "sha256": "20a4d6fa775e40e407c2df9bf74c471f5e8fc799d966bc72075e5ed50a8fa06b"
     },
     "aarch64": {
       "name": "linux-musl-aarch64.zip",
-      "sha256": "d8cfedc43bb1621807108daa156300c8875289e1ae06b5ab165db5c532f5d212"
+      "sha256": "cba67899439138baf8d47479f86b53e0981a799c4f91cc65c9e3fef2f6d70b12"
     },
     "armv7": {
       "name": "linux-musl-armv7.zip",
-      "sha256": "4aa880ed1d2785bdf49b6d755c4ff0413e308e891d0af7aaae4d33b84bf4f0c3"
+      "sha256": "5f1ddefed283641c4cc54ca911710a771accc70e83e74412c990978490a8657c"
     },
     "i386": {
       "name": "linux-musl-i686.zip",
-      "sha256": "3c86fa1d567790913b8b21d33195f829f95e3c7d44966aa14b05819a38c30863"
+      "sha256": "c957c6be9493d046bb9e9b53c379b787e2f9dd2a7fc0cb022a6cf42637733679"
     }
   }
 }
