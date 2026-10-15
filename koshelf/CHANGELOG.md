@@ -1,3 +1,7 @@
+# 2026.10.1
+
+- Update KoShelf to 2026.10.1. Review upstream release notes and Home Assistant smoke results before merging.
+
 # 2026.10.0.2
 
 - Replace direct-access modes and the legacy authentication setting with one on/off switch.
