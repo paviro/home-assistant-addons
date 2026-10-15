@@ -1,0 +1,101 @@
+configuration:
+  direct_access:
+    name: Direct access
+    description: Auto preserves old authenticated access. Enabled requires KoShelf login;
+      disabled closes the direct listener.
+  allow_insecure_http:
+    name: Allow LAN HTTP
+    description: Explicitly allow unencrypted direct login on a trusted LAN. Legacy auto mode
+      preserves HTTP independently.
+  direct_url:
+    name: Direct HTTPS origin
+    description: External HTTPS origin without a path, for example https://books.example.com.
+  allowed_ha_user_ids:
+    name: Allowed Home Assistant users
+    description: Exact HA user IDs; an empty list permits every authenticated HA user. Everyone
+      shares the same library.
+  enable_auth:
+    name: Legacy authentication setting
+    description: 'Used only by direct_access: auto during migration. Direct access always
+      requires authentication.'
+  reset_password:
+    name: Reset direct-login password
+    description: Generate a new password and revoke sessions. Automatically cleared after
+      a successful reset.
+  trusted_proxies:
+    name: Trusted direct-access proxies
+    description: Exact TLS proxy IPs/CIDRs allowed to assert client address and scheme. Never
+      grants login.
+  library_path:
+    name: Library folders
+    description: One or more folders under /share or /media containing your books and KOReader
+      metadata.
+  database_path:
+    name: Reading statistics database
+    description: Path to KOReader statistics.sqlite3 under /share or /media.
+  statistics_db:
+    name: Reading statistics databases
+    description: List of KOReader statistics.sqlite3 paths to merge across devices. Combined
+      with the existing database_path setting; identical paths are passed only once.
+  document_metadata_folder:
+    name: Book metadata location
+    description: Match KOReader's setting for custom metadata and covers. Use doc for
+      adjacent sidecars, dir for docsettings, or hash for hashdocsettings.
+  archive_enabled:
+    name: Preserve missing books
+    description: Keep missing books visible as archives with saved metadata and covers.
+      Disabling hides archives and suspends retention cleanup without deleting saved files.
+  archive_retention_days:
+    name: Removed archive retention
+    description: Days to keep saved metadata and covers after an archived entry is removed.
+      Use 0 for immediate deletion or forever to keep them indefinitely.
+  enable_library_management:
+    name: Allow archive removal
+    description: Allow all authorized users to remove archived entries. Requires archive
+      preservation; original ebooks and KOReader sidecars are never deleted.
+  kobo_db:
+    name: Kobo database
+    description: Optional KoboReader.sqlite for extensionless kepub discovery; requires library
+      folders.
+  docsettings_path:
+    name: Docsettings folder
+    description: Optional separate KOReader metadata folder; requires library folders.
+  hashdocsettings_path:
+    name: Hashed metadata folder
+    description: Optional KOReader hashdocsettings folder; requires library folders.
+  include_unread:
+    name: Include unread books
+    description: Include books without reading metadata.
+  include_all_stats:
+    name: Include all statistics
+    description: Include statistics for books outside the configured library.
+  heatmap_scale_max:
+    name: Heatmap maximum
+    description: Auto or a duration such as 1h.
+  day_start_time:
+    name: Day start time
+    description: Logical day boundary in HH:MM format.
+  min_pages_per_day:
+    name: Minimum daily pages
+    description: Optional minimum pages for statistics.
+  min_time_per_day:
+    name: Minimum daily reading time
+    description: Duration such as 30s or 15m; off disables the filter.
+  language:
+    name: Language and locale
+    description: Full locale such as en_US or de_DE.
+  enable_writeback:
+    name: Allow metadata editing
+    description: Allow all authorized users to edit supported KOReader metadata.
+  ignore_stable_page_metadata:
+    name: Ignore stable page metadata
+    description: Ignore stable-page metadata in reading statistics.
+  debug_log:
+    name: Debug logging
+    description: Enable upstream debug logs for troubleshooting.
+  title:
+    name: Library title
+    description: Leave empty to use KoShelf.
+  timezone:
+    name: Timezone
+    description: Optional IANA timezone such as Europe/Berlin.

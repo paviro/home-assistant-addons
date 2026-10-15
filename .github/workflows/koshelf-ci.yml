@@ -1,0 +1,34 @@
+name: KoShelf checks
+on:
+  pull_request:
+    paths: ['koshelf/**', '.github/workflows/koshelf-*.yml']
+  push:
+    paths: ['koshelf/**', '.github/workflows/koshelf-*.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  wrapper:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Validate metadata and upgrade ordering
+        run: |
+          python3 -m venv /tmp/koshelf-ci-env
+          /tmp/koshelf-ci-env/bin/pip install -r koshelf/tests/requirements.txt
+          /tmp/koshelf-ci-env/bin/python koshelf/scripts/validate-metadata.py
+      - run: python3 -m unittest discover -s koshelf/tests -v
+      - run: python3 -m compileall -q koshelf
+      - run: sh -n koshelf/run.sh koshelf/scripts/check-release.sh
+  release-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
+      - name: Build and smoke-test every advertised architecture
+        run: sh koshelf/scripts/check-release.sh

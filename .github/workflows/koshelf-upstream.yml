@@ -1,0 +1,51 @@
+name: KoShelf upstream update
+on:
+  schedule:
+    - cron: '19 6 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+  pull-requests: write
+concurrency:
+  group: koshelf-upstream-update
+  cancel-in-progress: false
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Discover and pin a newer stable release
+        id: upstream
+        run: python3 koshelf/scripts/update-upstream.py --write
+      - if: steps.upstream.outputs.changed == 'true'
+        uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
+      - name: Verify candidate before opening a PR
+        if: steps.upstream.outputs.changed == 'true'
+        run: |
+          python3 -m venv /tmp/koshelf-ci-env
+          /tmp/koshelf-ci-env/bin/pip install -r koshelf/tests/requirements.txt
+          /tmp/koshelf-ci-env/bin/python koshelf/scripts/validate-metadata.py
+          python3 -m unittest discover -s koshelf/tests -v
+          sh koshelf/scripts/check-release.sh
+      - name: Open reviewed-update candidate
+        if: steps.upstream.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7
+        with:
+          branch: automation/koshelf-upstream
+          delete-branch: true
+          add-paths: |
+            koshelf/upstream.json
+            koshelf/config.yaml
+            koshelf/CHANGELOG.md
+          commit-message: 'chore(koshelf): update upstream to ${{ steps.upstream.outputs.version }}'
+          title: 'Update KoShelf to ${{ steps.upstream.outputs.version }}'
+          body: |
+            Pins the new stable KoShelf release and all four Linux musl checksums.
+            The update workflow built and ran the real-server/nginx smoke tests for
+            every advertised architecture before creating this PR.
+
+            Review upstream changes and complete the Home Assistant checks in
+            koshelf/TESTING.md before merging. No automatic merge or deployment.

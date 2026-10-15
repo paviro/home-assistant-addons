@@ -1,0 +1,26 @@
+{
+  "version": "2026.10.0",
+  "integration_ready": true,
+  "required_flags": [
+    "--bind-address",
+    "--auth-proxy-peers"
+  ],
+  "assets": {
+    "amd64": {
+      "name": "linux-musl-x86_64.zip",
+      "sha256": "4fb09abd46180ab8f52039ab1e42f3527947811e489d711dd4ae02bbe3f6e6ff"
+    },
+    "aarch64": {
+      "name": "linux-musl-aarch64.zip",
+      "sha256": "d8cfedc43bb1621807108daa156300c8875289e1ae06b5ab165db5c532f5d212"
+    },
+    "armv7": {
+      "name": "linux-musl-armv7.zip",
+      "sha256": "4aa880ed1d2785bdf49b6d755c4ff0413e308e891d0af7aaae4d33b84bf4f0c3"
+    },
+    "i386": {
+      "name": "linux-musl-i686.zip",
+      "sha256": "3c86fa1d567790913b8b21d33195f829f95e3c7d44966aa14b05819a38c30863"
+    }
+  }
+}

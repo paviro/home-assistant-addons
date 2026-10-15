@@ -1,0 +1,7 @@
+tests
+scripts
+__pycache__
+*.md
+!UPSTREAM.md
+translations
+*.png
